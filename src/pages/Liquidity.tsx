@@ -51,15 +51,15 @@ const Liquidity = () => {
   const [isApprovedBust, setIsApprovedBust] = useState(true);
   const [isApprovedRest, setIsApprovedRest] = useState(true);
   // const [amount1, setAmount1] = useState();
-  const [bustlp, setBustlp] = useState<string|number>();
+  const [bustlp, setBustlp] = useState<string | number>();
   const [bustR, setBustR] = useState<string>();
   const selector = useSelector((state: any) => state);
   const { RouterBust, REST, BUST, BustPair } = selector;
   const { address } = selector.wallet;
-  const [initial, setInitial] = useState("")
-  const [selectedLP, setSelectedLP] = useState<any>()
-  const maxAllowance = new BigNumber(2).pow(256).minus(1)
-  const [addLiquidityLoading, setAddLiquidityLoading] = useState(false)
+  const [initial, setInitial] = useState("");
+  const [selectedLP, setSelectedLP] = useState<any>();
+  const maxAllowance = new BigNumber(2).pow(256).minus(1);
+  const [addLiquidityLoading, setAddLiquidityLoading] = useState(false);
 
   /** function to get balance of tokens */
   const getTokenBalance = async () => {
@@ -75,7 +75,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getTokenBalance();
-  }, [REST,BUST, address, addLiquidityLoading]);
+  }, [REST, BUST, address, addLiquidityLoading]);
 
   /** useEffect to get Reserves */
   const getReserve = async () => {
@@ -128,31 +128,35 @@ const Liquidity = () => {
   };
 
   /** Check Allowences for both the tokens */
-  const getAllowances = async (rest:any = '', bust:any = '') => {
-  try{
-    const allowanceA= await REST.methods.allowance(address,BustRouterAddress).call()
-    const allowanceB = await BUST.methods.allowance(address,BustRouterAddress).call()
-    if(rest !== ''){
-      if (parseFloat(weiToEth(allowanceA, 18)) > parseFloat(rest)){
-        setIsApprovedRest(true)
-      } else{
-        setIsApprovedRest(false)
+  const getAllowances = async (rest: any = "", bust: any = "") => {
+    try {
+      const allowanceA = await REST.methods
+        .allowance(address, BustRouterAddress)
+        .call();
+      const allowanceB = await BUST.methods
+        .allowance(address, BustRouterAddress)
+        .call();
+      if (rest !== "") {
+        if (parseFloat(weiToEth(allowanceA, 18)) > parseFloat(rest)) {
+          setIsApprovedRest(true);
+        } else {
+          setIsApprovedRest(false);
+        }
       }
-    }
-    if(bust !== ''){
-      if(parseFloat(weiToEth(allowanceB, 18)) > parseFloat(bust)){
-        setIsApprovedBust(true)
-      } else{
-        setIsApprovedBust(false)
+      if (bust !== "") {
+        if (parseFloat(weiToEth(allowanceB, 18)) > parseFloat(bust)) {
+          setIsApprovedBust(true);
+        } else {
+          setIsApprovedBust(false);
+        }
       }
+    } catch (err) {
+      console.log(err);
     }
-  } catch(err){
-    console.log(err);
-  }
-}
+  };
   useEffect(() => {
     getAllowances(rest, bust);
-  }, [rest, bust])
+  }, [rest, bust]);
 
   /** Approve REST Token */
   const approveREST = async () => {
@@ -201,17 +205,17 @@ const Liquidity = () => {
   };
 
   /** function to convert min values of */
-  const convertToMin = (number:any) =>{
-    const convert = ((parseFloat(number) * 0.5 ) / 100 ).toFixed(5)
-    const convertToWei = ethToWei(convert, 18)
-    return convertToWei
-  }
+  const convertToMin = (number: any) => {
+    const convert = ((parseFloat(number) * 0.5) / 100).toFixed(5);
+    const convertToWei = ethToWei(convert, 18);
+    return convertToWei;
+  };
 
   /** AddLiquidity Function */
   const addLiquidity = async () => {
-    setAddLiquidityLoading(true)
-    const aMin = convertToMin(rest)
-    const bMin = convertToMin(bust)
+    setAddLiquidityLoading(true);
+    const aMin = convertToMin(rest);
+    const bMin = convertToMin(bust);
     try {
       const add = await RouterBust.methods
         .addLiquidity(
@@ -226,18 +230,18 @@ const Liquidity = () => {
         )
         .send({ from: address })
         .on("receipt", function () {
-          setAddLiquidityLoading(false)
-          setBust('')
-          setRest('')
+          setAddLiquidityLoading(false);
+          setBust("");
+          setRest("");
         })
         .on("confirmation", function () {
-          setAddLiquidityLoading(false)
-          setBust('')
-          setRest('')
+          setAddLiquidityLoading(false);
+          setBust("");
+          setRest("");
         })
         .on("error", function () {
-          setAddLiquidityLoading(false)
-          console.log('error adding liquidity');
+          setAddLiquidityLoading(false);
+          console.log("error adding liquidity");
         });
     } catch (err) {
       console.log(err);
@@ -262,7 +266,7 @@ const Liquidity = () => {
     const getBUST = async () => {
       try {
         const BUSTR = await BUST.methods.balanceOf(address).call();
-        setBustR(weiToEth(BUSTR,18));
+        setBustR(weiToEth(BUSTR, 18));
       } catch (err) {
         console.log(err);
       }
@@ -272,12 +276,12 @@ const Liquidity = () => {
 
   /** useEffect to get selectedLP Token */
   useEffect(() => {
-    if(percentage === 100){
-      setSelectedLP(bustlp)
-    } else{
-      setSelectedLP(Number(bustlp) * (percentage/100))
+    if (percentage === 100) {
+      setSelectedLP(bustlp);
+    } else {
+      setSelectedLP(Number(bustlp) * (percentage / 100));
     }
-  }, [percentage, selectedLP])
+  }, [percentage, selectedLP]);
   return (
     <>
       <Navbar />
@@ -341,7 +345,7 @@ const Liquidity = () => {
                   <SlippageDiv>1BUST = 0.401490 BUSD</SlippageDiv>
                 </BusdAndBustDiv>
                 <SwapButtonDiv>
-                {!isApprovedRest && (
+                  {!isApprovedRest && (
                     <SwapButton
                       onClick={() => approveREST()}
                       disabled={rest === ""}
@@ -358,8 +362,17 @@ const Liquidity = () => {
                     </SwapButton>
                   )}
                   {isApprovedBust && isApprovedRest && (
-                    <SwapButton onClick={() => addLiquidity()} disabled={(rest === "" && rest === "") && !addLiquidityLoading}>
-                      {addLiquidityLoading ? <Spinner fontSize='14px'/> : 'Supply'}
+                    <SwapButton
+                      onClick={() => addLiquidity()}
+                      disabled={
+                        rest === "" && rest === "" && !addLiquidityLoading
+                      }
+                    >
+                      {addLiquidityLoading ? (
+                        <Spinner fontSize="14px" />
+                      ) : (
+                        "Supply"
+                      )}
                     </SwapButton>
                   )}
                 </SwapButtonDiv>
@@ -413,7 +426,9 @@ const Liquidity = () => {
                   <PoolTokenContainer>
                     <PoolTokenHeading>Selected Tokens</PoolTokenHeading>
                     <ValueAndToken>
-                      <Value>{selectedLP || Number(bustlp) * (50/100) || 0.00} </Value>
+                      <Value>
+                        {selectedLP || Number(bustlp) * (50 / 100) || 0.0}{" "}
+                      </Value>
                       <Token>BUST-LP</Token>
                     </ValueAndToken>
                     <ValueAndToken>

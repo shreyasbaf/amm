@@ -1,5 +1,17 @@
-import styled from "styled-components"
-import Navbar from "./Navbar"
+import styled from "styled-components";
+import {
+  ArrowSignDiv,
+  BusdAndBustDiv,
+  FormContainerMain,
+  FormInputOne,
+  FormInputOneHeading,
+  HeadingOne,
+  InputField,
+  SlipAndToleDiv,
+  SlippageDiv,
+  SwapButtonDiv,
+} from "./LiquidityStyles";
+import Navbar from "./Navbar";
 
 const Swap = () => {
   return (
@@ -45,85 +57,51 @@ const Swap = () => {
         </SwapOuterDiv>
       </SwapContainerMain>
     </>
-  )
-}
+  );
+};
 
-export default Swap
+export default Swap;
 
 const SwapContainerMain = styled.div`
-    display: flex;
-    -webkit-box-pack: center;
-    justify-content: center;
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
 `;
 
 const SwapOuterDiv = styled.div`
-    max-width: 420px;
-    width: 100%;
-    background: rgb(255, 253, 250);
-    box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
-    border-radius: 20px;
-    padding: 1rem;
-    margin: 40px 0px;
+  max-width: 420px;
+  width: 100%;
+  background: rgb(255, 253, 250);
+  box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
+    rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
+  border-radius: 20px;
+  padding: 1rem;
+  margin: 40px 0px;
 `;
 
 const SwapInterDiv = styled.div`
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 `;
 
 const SwapHeadingDiv = styled.div`
-    display: flex;
-    flex-direction: row;
-    -webkit-box-pack: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  justify-content: center;
 `;
 
 const SwapHeading = styled.div`
-    background: orange;
-    box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
-    border-radius: 10px;
-    padding: 0.5rem;
-    margin: 0px 10px;
-    cursor: pointer;
-    font-family: NunitoSans;
+  /* background:#10363d; */
+  color: #10363d;
+  box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
+    rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 0px 10px;
+  cursor: pointer;
+  /* border: 1px solid #10363d; */
 `;
-
-const FormContainerMain = styled.div`
-
-`;
-
-const FormInputOne = styled.div`
-    padding: 10px;
-    border-radius: 20px;
-    background-color: rgb(255, 249, 240);
-    margin: 10px;
-`;
-
-const FormInputOneHeading = styled.div`
-    display: flex;
-    -webkit-box-pack: justify;
-    justify-content: space-between;
-`; 
-
-const HeadingOne = styled.p`
-  font-size: 16px;
-  color: black;
-`;
-
-const InputField = styled.input`
-    width: 100%;
-    outline: none;
-    border: none;
-    background-color: rgb(255, 249, 240);
-`;
-
-const ArrowSignDiv = styled.div`
-    display: flex;
-    -webkit-box-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-`; 
 
 const ArrowSign = styled.div`
   background-image: url("https://anmfmt.web.app/static/media/arrow.167534cd.svg");
@@ -132,46 +110,15 @@ const ArrowSign = styled.div`
   width: 16px;
 `;
 
-const SlipAndToleDiv = styled.div`
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    -webkit-box-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-`;
-
-const SlippageDiv = styled.div`
-  font-size: 15px;
-`; 
-
-const BusdAndBustDiv = styled.div`
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    -webkit-box-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-`;
-
-const SwapButtonDiv = styled.div`
-    display: flex;
-    -webkit-box-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-`;
-
 const SwapButton = styled.button`
-    padding: 10px;
-    border-radius: 20px;
-    opacity: 0.5;
-    cursor: pointer;
-    box-shadow: none;
-    background-color: rgb(255, 104, 113);
-    border: 1px solid rgb(255, 104, 113);
-    margin: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 20px;
+  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  box-shadow: none;
+  background-color: #10363d;
+  border: none;
+  margin: 10px;
+  color: white;
 `;
-

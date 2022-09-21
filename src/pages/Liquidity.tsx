@@ -335,7 +335,7 @@ const Liquidity = () => {
   const approvePair = async () => {
     try {
       const approve = await BustPair.methods
-        .approve(address, ethToWei(selectedLP))
+        .approve(BustRouterAddress, ethToWei(selectedLP))
         .send({ from: address })
         .on("receipt", function () {
           approveSuccess();
@@ -350,6 +350,7 @@ const Liquidity = () => {
 
   const removeLiquidity = async () => {
     try {
+      await approvePair();
       const remove = await RouterBust.methods
         .removeLiquidity(
           RESTAddress,

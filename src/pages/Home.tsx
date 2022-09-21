@@ -1,10 +1,8 @@
-import Navbar from "./Navbar"
 import styled from "styled-components"
 
 const Home = () => {
   return (
     <>
-      <Navbar />
       <HomeContainerMain>
         <HomeHeading>
           The moon is made of pancakes.
@@ -51,7 +49,6 @@ const Button = styled.div`
     border: 2px solid rgb(69, 87, 87);
     transition: all 0.5s linear 0s;
     cursor: pointer;
-
     :hover{
       color: rgb(255, 255, 255);
       opacity: 0.8;

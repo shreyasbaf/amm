@@ -107,7 +107,7 @@ const NavbarContainer = styled.div`
     position: sticky;
     top: 0px;
     backdrop-filter: blur(8px);
-    background: rgba(9, 34, 39, 0.5)
+    background: rgba(9, 34, 39, 0.5);
 `;
 
 const NavbarContainerMain = styled.div`

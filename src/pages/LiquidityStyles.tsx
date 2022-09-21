@@ -4,6 +4,7 @@ export const LiquidityContainerMain = styled.div`
 display: flex;
 -webkit-box-pack: center;
 justify-content: center;
+font-family: 'Inter', sans-serif;
 `;
 
 export const LiquidityOuterDiv = styled.div`
@@ -39,7 +40,11 @@ padding: 1rem;
 margin: 0px 10px;
 cursor: pointer;
 border: 1px solid #10363d;
-
+:hover{
+  background: #10363dB3;
+  color: white;
+  /* opacity: 0.9; */
+    }
 `;
 
 export const FormContainerMain = styled.div``;
@@ -62,6 +67,8 @@ export const HeadingOne = styled.p`
 font-size: 16px;
 color: black;
 margin: 0 0 12px 0;
+font-family: 'Inter', sans-serif;
+
 `;
 
 export const InputField = styled.input`
@@ -98,6 +105,7 @@ align-items: center;
 
 export const SlippageDiv = styled.div`
 font-size: 15px;
+font-family: 'Inter', sans-serif;
 `;
 
 export const BusdAndBustDiv = styled.div`
@@ -117,6 +125,7 @@ display: flex;
 justify-content: center;
 -webkit-box-align: center;
 align-items: center;
+
 `;
 
 export const SwapButton = styled.button<any>`
@@ -174,8 +183,68 @@ align-items: center;
 
 export const Value = styled.span`
 font-size: 16px;
+font-family: 'Inter', sans-serif;
 `;
 
 export const Token = styled.span`
 font-size: 16px;
+font-family: 'Inter', sans-serif;
+`;
+
+export const PriceShare = styled.div`
+  padding: 12px 16px 36px 16px;
+  margin-top: 24px;
+  background-color: #10363d;
+  border-radius: 16px 16px 0 0;
+  color: white;
+  display: flex;
+  justify-content: space-evenly;
+`;
+
+export const PriceShareBottom = styled.div`
+  margin-top: -20px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 16px;
+  border: 1px solid #10363d;
+  display: flex;
+  justify-content: space-evenly;
+  margin-bottom: 12px;
+  min-height: 54px;
+`;
+
+export const InitialValues = styled.div`
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  line-height: 24px;
+  button{
+    font-size: 20px;
+    border: none;
+    margin: 0 12px;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 8px;
+    :hover{
+      background-color: #10363d;
+      color: white;
+      opacity: 0.5;
+    }
+  }
+`;
+
+export const OptionsDiv = styled.div<any>`
+background-color: ${({active}) =>(active ? 'white' : 'transparent')};
+padding: 6px 20px;
+font-size: 12px;
+font-family: 'Inter', sans-serif;
+color: ${({active}) =>(active ? '#10363d' : 'white')};
+border-radius: 120px;
+cursor: pointer;
+/* border: 1px solid ${({active}) =>(active ? '#10363d' : 'transparent')}; */
+:hover{
+      opacity: 0.8;
+      /* border: 1px solid white; */
+    }
 `;

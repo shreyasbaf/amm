@@ -30,16 +30,11 @@ import {
   OptionsDiv,
   PercentageButton,
   PoolContainerMain,
-  PoolTokenContainer,
-  PoolTokenHeading,
   PriceShare,
   PriceShareBottom,
   RangeSlider,
   SwapButton,
   SwapButtonDiv,
-  Token,
-  Value,
-  ValueAndToken,
 } from "./LiquidityStyles";
 import { DetailsBlock } from "./DetailsBlock";
 import Swap from "./Swap";
@@ -67,10 +62,6 @@ const Liquidity = () => {
   const [addLiquidityLoading, setAddLiquidityLoading] = useState(false);
   const [isLiquidityAdded, setisLiquidityAdded] = useState(false);
   const [totalSupply, setTotalSupply] = useState<any>("");
-  const success = () => toast.success("Liquidity Added Successfully!");
-  const failure = () => toast.error("Error adding Liquidity!");
-  const approveSuccess = () => toast.success("Token Approved!");
-  const approveFailure = () => toast.error("Error approving token!");
   // const slippageVal = slippage
   const [tokenA, setTokenA] = useState<any>();
   const [tokenB, setTokenB] = useState<any>();
@@ -80,7 +71,15 @@ const Liquidity = () => {
   const [initialBust, setInitialBust] = useState("");
 
   const [isRemoveAllowed, setIsRemoveAllowed] = useState(false);
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [isRemoveLiquidityLoading, setIsRemoveLiquidityLoading] = useState(false);
 
+  const success = () => toast.success("Liquidity Added Successfully!");
+  const failure = () => toast.error("Error adding Liquidity!");
+  const approveSuccess = () => toast.success("Token Approved!");
+  const approveFailure = () => toast.error("Error approving token!");
+  const removeSuccess = () => toast.success("Liquidity removed Successfully!!");
+  const removeFailure = () => toast.error("Error removing Liquidity!");
   /** useEffect to get Reserves */
   const getReserve = async () => {
     try {
@@ -115,12 +114,11 @@ const Liquidity = () => {
     } catch (err) {
       console.log(err);
     }
-    console.log("getInitial", initlalREST, initialBust);
   };
 
   useEffect(() => {
     getInitials();
-  }, [rest, bust]);
+  }, [RouterBust, reserve1, reserve0]);
 
   /** function to get balance of tokens */
   const getTokenBalance = async () => {
@@ -136,7 +134,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getTokenBalance();
-  }, [REST, BUST, address, addLiquidityLoading]);
+  }, [REST, BUST, address, addLiquidityLoading, isRemoveLiquidityLoading]);
 
   /**  function to get quote values */
   const getQuoteBusd = async (bust: any) => {
@@ -277,35 +275,52 @@ const Liquidity = () => {
     }
   };
 
-  /** useEffect to get BustLP */
-  useEffect(() => {
-    const getBUSTLP = async () => {
-      try {
-        const BUSTLP = await BustPair.methods.balanceOf(address).call();
-        setBustlp(weiToEth(BUSTLP, 18));
-        if (BUSTLP > 0) {
-          setisLiquidityAdded(true);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    getBUSTLP();
-  }, [BustPair, address]);
+  /**REMOVE LIQUIDITY */
 
-  /** useEffect to get selected Token values */
-  useEffect(() => {
-    if (percentage === 100) {
-      setSelectedLP(bustlp);
-      setSelectedTokenA(tokenA);
-      setSelectedTokenB(tokenB);
-    } else {
-      setSelectedLP(Number(bustlp) * (percentage / 100));
-      setSelectedTokenB(Number(tokenB) * (percentage / 100));
-      setSelectedTokenA(Number(tokenA) * (percentage / 100));
+  /** useEffect to get Pair Tokens */
+  const getBUSTLP = async () => {
+    try {
+      const BUSTLP = await BustPair.methods.balanceOf(address).call();
+      setBustlp(weiToEth(BUSTLP, 18));
+      if (BUSTLP > 0) {
+        setisLiquidityAdded(true);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    removeAllowance();
-  }, [percentage, selectedLP, tokenB, tokenA]);
+  };
+  useEffect(() => {
+    getBUSTLP();
+  }, [BustPair, address, isRemoveLiquidityLoading, addLiquidityLoading]);
+
+    /** useEffect to get selected Token values */
+    useEffect(() => {
+      if (percentage === 100) {
+        setSelectedLP(bustlp);
+        setSelectedTokenA(tokenA);
+        setSelectedTokenB(tokenB);
+      } else {
+        setSelectedLP(Number(bustlp) * (percentage / 100));
+        setSelectedTokenB(Number(tokenB) * (percentage / 100));
+        setSelectedTokenA(Number(tokenA) * (percentage / 100));
+      }
+      removeAllowance();
+    }, [percentage, selectedLP, tokenB, tokenA, isRemoveLiquidityLoading, addLiquidityLoading]);
+
+  const removeAllowance = async () => {
+    try {
+      const allowance = await BustPair.methods
+        .allowance(address, BustRouterAddress)
+        .call();
+      if (parseFloat(weiToEth(allowance)) >= parseFloat(selectedLP)) {
+        setIsRemoveAllowed(true);
+      } else {
+        setIsRemoveAllowed(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   /**function to get totalSupply */
   const getTotalSupply = async () => {
@@ -325,7 +340,9 @@ const Liquidity = () => {
     }
   };
 
-  const [approveLoading, setApproveLoading] = useState(false);
+  useEffect(() => {
+    getTotalSupply();
+  }, [tokenB, tokenA, isRemoveLiquidityLoading]);
 
   const approvePair = async () => {
     try {
@@ -352,23 +369,9 @@ const Liquidity = () => {
     }
   };
 
-  const removeAllowance = async () => {
-    try {
-      const allowance = await BustPair.methods
-        .allowance(address, BustRouterAddress)
-        .call();
-      if (parseFloat(weiToEth(allowance)) >= parseFloat(selectedLP)) {
-        setIsRemoveAllowed(true);
-      } else {
-        setIsRemoveAllowed(false);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const removeLiquidity = async () => {
     try {
+      setIsRemoveLiquidityLoading(true)
       // await approvePair();
       if (selectedLP && selectedtokenA && selectedtokenB) {
         const remove = await RouterBust.methods
@@ -383,26 +386,24 @@ const Liquidity = () => {
           )
           .send({ from: address })
           .on("receipt", function () {
-            approveSuccess();
+            removeSuccess();
+            setPercentage(50);
+            setIsRemoveLiquidityLoading(false)
           })
           .on("error", function () {
-            approveFailure();
+            removeFailure();
+            setIsRemoveLiquidityLoading(false)
           });
       }
+      setIsRemoveLiquidityLoading(false)
     } catch (error) {
       console.log(error);
+      setIsRemoveLiquidityLoading(false)
     }
   };
 
-  useEffect(() => {
-    getTotalSupply();
-  }, [tokenB, tokenA]);
-
   return (
     <>
-      <LiquidityContainerMain>
-        <LiquidityOuterDiv>
-          <LiquidityInterDiv>
             <HeadingButtonDiv>
               <AddHeading
                 onClick={() => setActive("Add")}
@@ -422,7 +423,7 @@ const Liquidity = () => {
                   Remove Liquidity
                 </AddHeading>
               )}
-              {/* <AddHeading
+              <AddHeading
                   onClick={() => {
                     setActive("Swap");
                     getTotalSupply();
@@ -431,9 +432,12 @@ const Liquidity = () => {
                   active={active === "Swap"}
                 >
                   Swap
-                </AddHeading> */}
+                </AddHeading>
             </HeadingButtonDiv>
-            {active === "Swap" && <Swap />}
+      <LiquidityContainerMain>
+        <LiquidityOuterDiv>
+          <LiquidityInterDiv>
+            {active === "Swap" && <Swap initialBUST={initialBust} initialRUST={initlalREST} />}
             {active === "Add" && (
               <FormContainerMain>
                 <FormInputOne>
@@ -592,6 +596,7 @@ const Liquidity = () => {
                 </SwapButtonDiv>
               </>
             ) : (
+              active === "remove" &&
               <SwapButtonDiv>
                 {!isRemoveAllowed ? (
                   <SwapButton
@@ -609,7 +614,7 @@ const Liquidity = () => {
                   disabled={!isRemoveAllowed}
                   onClick={() => removeLiquidity()}
                 >
-                  Remove
+                {isRemoveLiquidityLoading ? <Spinner fontSize='14px'/> :   'Remove'}
                 </SwapButton>
               </SwapButtonDiv>
             )}

@@ -28,10 +28,11 @@ display: flex;
 flex-direction: row;
 -webkit-box-pack: center;
 justify-content: center;
+margin-bottom: 12px;
 `;
 
 export const AddHeading = styled.div<{ active: boolean }>`
-background: ${(props) => (props.active ? `#10363d` : "transparent")};
+background: ${(props) => (props.active ? `#10363d` : 'white')};
 color: ${(props) => (props.active ? 'white' : "black")};
 box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
@@ -44,11 +45,10 @@ align-items: center;
 text-align: center;
 min-width: 80px;
 justify-content: center;
+transition: all 0.5s linear 0s;
 :hover{
-  background: #10363dB3;
-  color: white;
-  /* opacity: 0.9; */
-    }
+  box-shadow: white 2px 2px;
+}
 `;
 
 export const FormContainerMain = styled.div``;
@@ -59,6 +59,10 @@ border-radius: 20px;
 background-color: transparent;
 margin: 10px;
 border: 1px solid #10363d;
+transition: all 0.5s linear 0s;
+:hover{
+  box-shadow: #10363dB3 2px 2px;
+}
 `;
 
 export const FormInputOneHeading = styled.div`
@@ -88,6 +92,7 @@ display: flex;
 justify-content: center;
 -webkit-box-align: center;
 align-items: center;
+cursor: pointer;
 `;
 
 export const ArrowSign = styled.div`

@@ -33,8 +33,15 @@ import { BustRouterAddress } from "../abi/bustRouterABI";
 import { Spinner } from "./Spinner";
 import { ToastContainer, toast } from "react-toastify";
 import { DetailsBlock } from "./DetailsBlock";
+import { INITIALBUST, INITIALRUST } from "../logic/action/actiontype";
 
-const Swap = () => {
+interface Props{
+  initialRUST: any;
+  initialBUST: any;
+}
+
+const Swap = (props: Props) => {
+  const{ initialRUST, initialBUST } = props;
   const selector = useSelector((state: any) => state);
   const { RouterBust, REST, BUST, slippage } = selector;
   const { address } = selector.wallet;
@@ -214,12 +221,6 @@ const Swap = () => {
 
   return (
     <>
-      <SwapContainerMain>
-        <SwapOuterDiv>
-          <SwapInterDiv>
-            <SwapHeadingDiv>
-              <SwapHeading>Swap</SwapHeading>
-            </SwapHeadingDiv>
             <FormContainerMain>
               <FormInputOne>
                 <FormInputOneHeading>
@@ -256,10 +257,9 @@ const Swap = () => {
                   onChange={(e) => handleInputTwo(e.target.value)}
                 ></InputField>
               </FormInputOne>
-
               <DetailsBlock
-                bust={0.00}
-                rest={0.00}
+                bust={initialBUST}
+                rest={initialRUST}
                 slippage={0.5}
                 deadline={15}
               />
@@ -269,8 +269,6 @@ const Swap = () => {
                 </SwapButton>
               </SwapButtonDiv>
             </FormContainerMain>
-          </SwapInterDiv>
-        </SwapOuterDiv>
         <ToastContainer
           position="top-center"
           autoClose={3000}
@@ -282,7 +280,6 @@ const Swap = () => {
           draggable
           pauseOnHover={false}
         />
-      </SwapContainerMain>
     </>
   );
 };

@@ -4,29 +4,19 @@ import {
   convertToMax,
   convertToMin,
   ethToWei,
+  maxAllowance,
   weiToEth,
 } from "../logic/Conversions";
 import {
   ArrowSignDiv,
-  BusdAndBustDiv,
   FormContainerMain,
   FormInputOne,
   FormInputOneHeading,
   HeadingOne,
   InputField,
-  SlipAndToleDiv,
-  SlippageDiv,
   SwapButtonDiv,
 } from "./LiquidityStyles";
-import {
-  ArrowSign,
-  SwapButton,
-  SwapContainerMain,
-  SwapHeading,
-  SwapHeadingDiv,
-  SwapInterDiv,
-  SwapOuterDiv,
-} from "./SwapStyles";
+import { ArrowSign, SwapButton } from "./SwapStyles";
 import { wbnbAddress } from "../abi/rest"; // BUSD
 import { bustFactoryAddress } from "../abi/bust"; //BUST
 import { BustRouterAddress } from "../abi/bustRouterABI";
@@ -35,13 +25,13 @@ import { ToastContainer, toast } from "react-toastify";
 import { DetailsBlock } from "./DetailsBlock";
 import { INITIALBUST, INITIALRUST } from "../logic/action/actiontype";
 
-interface Props{
+interface Props {
   initialRUST: any;
   initialBUST: any;
 }
 
 const Swap = (props: Props) => {
-  const{ initialRUST, initialBUST } = props;
+  const { initialRUST, initialBUST } = props;
   const selector = useSelector((state: any) => state);
   const { RouterBust, REST, BUST, slippage } = selector;
   const { address } = selector.wallet;
@@ -62,6 +52,8 @@ const Swap = (props: Props) => {
 
   const successSwap = () => toast.success("Swap Successfull!");
   const failureSwap = () => toast.error("Error doing Swap!");
+  const approveSuccess = () => toast.success("Token Approved!");
+  const approveFailure = () => toast.error("Error approving token!");
 
   /** function to get balance of tokens */
   const getTokenBalance = async () => {
@@ -87,22 +79,32 @@ const Swap = (props: Props) => {
 
   /** function to handle InputOne */
   const handleInputOne = async (input: any) => {
-    setAmountA(input);
-    const result = await RouterBust.methods
-      .getAmountsOut(ethToWei(input, 18), routerAddress)
-      .call();
-    setAmountB(weiToEth(result[1], 18));
-    setType(1);
+    if (input) {
+      setAmountA(input);
+      const result = await RouterBust.methods
+        .getAmountsOut(ethToWei(input, 18), routerAddress)
+        .call();
+      setAmountB(weiToEth(result[1], 18));
+      setType(1);
+    } else {
+      setAmountA("");
+      setAmountB("");
+    }
   };
 
   /** function to handle InputTwo */
   const handleInputTwo = async (input: any) => {
-    setAmountB(input);
-    const result = await RouterBust.methods
-      .getAmountsIn(ethToWei(input, 18), routerAddress)
-      .call();
-    setAmountA(weiToEth(result[0], 18));
-    setType(2);
+    if (input) {
+      setAmountB(input);
+      const result = await RouterBust.methods
+        .getAmountsIn(ethToWei(input, 18), routerAddress)
+        .call();
+      setAmountA(weiToEth(result[0], 18));
+      setType(2);
+    } else {
+      setAmountA("");
+      setAmountB("");
+    }
   };
 
   /** function to handle swapExactTokensForTokens */
@@ -179,6 +181,44 @@ const Swap = (props: Props) => {
     // setSwapLoading(false)
   };
 
+  /** Approve REST Token */
+  const approveREST = async () => {
+    try {
+      const approvebusd = await REST.methods
+        .approve(BustRouterAddress, maxAllowance)
+        .send({ from: address })
+        .on("receipt", function () {
+          approveSuccess();
+          setIsApprovedRest(true);
+        })
+        .on("error", function () {
+          approveFailure();
+          setIsApprovedRest(false);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  /** Approve BUST Token */
+  const approveBUST = async () => {
+    try {
+      const approvebust = await BUST.methods
+        .approve(BustRouterAddress, maxAllowance)
+        .send({ from: address })
+        .on("receipt", function () {
+          approveSuccess();
+          setIsApprovedBust(true);
+        })
+        .on("error", function () {
+          approveFailure();
+          setIsApprovedBust(false);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     getTokenBalance();
   }, [REST, BUST, address, swapLoading]);
@@ -212,74 +252,88 @@ const Swap = (props: Props) => {
   };
 
   useEffect(() => {
-    if(swapType === true){
+    if (swapType === true) {
       getAllowances(amountA, amountB);
-    } else{
+    } else {
       getAllowances(amountB, amountB);
     }
   }, [amountA, amountB]);
 
   return (
     <>
-            <FormContainerMain>
-              <FormInputOne>
-                <FormInputOneHeading>
-                  <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne>
-                  <HeadingOne>
-                    Balance:
-                    {swapType === true
-                      ? parseFloat(rustBalance).toFixed(2)
-                      : parseFloat(bustBalance).toFixed(2)}
-                  </HeadingOne>
-                </FormInputOneHeading>
-                <InputField
-                  placeholder="0.00"
-                  value={amountA}
-                  onChange={(e) => handleInputOne(e.target.value)}
-                ></InputField>
-              </FormInputOne>
-              <ArrowSignDiv onClick={() => handleChangeRouter()}>
-                <ArrowSign></ArrowSign>
-              </ArrowSignDiv>
-              <FormInputOne>
-                <FormInputOneHeading>
-                  <HeadingOne>{swapType === true ? "BUST" : "REST"}</HeadingOne>
-                  <HeadingOne>
-                    Balance:
-                    {swapType === true
-                      ? parseFloat(bustBalance).toFixed(2)
-                      : parseFloat(rustBalance).toFixed(2)}
-                  </HeadingOne>
-                </FormInputOneHeading>
-                <InputField
-                  placeholder="0.00"
-                  value={amountB}
-                  onChange={(e) => handleInputTwo(e.target.value)}
-                ></InputField>
-              </FormInputOne>
-              <DetailsBlock
-                bust={initialBUST}
-                rest={initialRUST}
-                slippage={0.5}
-                deadline={15}
-              />
-              <SwapButtonDiv>
-                <SwapButton disabled={!isApprovedBust && !isApprovedRest} onClick={() => handleSwap()}>
-                  {swapLoading ? <Spinner fontSize="14px" /> : "Swap Tokens"}
-                </SwapButton>
-              </SwapButtonDiv>
-            </FormContainerMain>
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover={false}
+      <FormContainerMain>
+        <FormInputOne>
+          <FormInputOneHeading>
+            <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne>
+            <HeadingOne>
+              Balance:
+              {swapType === true
+                ? parseFloat(rustBalance).toFixed(2)
+                : parseFloat(bustBalance).toFixed(2)}
+            </HeadingOne>
+          </FormInputOneHeading>
+          <InputField
+            placeholder="0.00"
+            value={amountA}
+            onChange={(e) => handleInputOne(e.target.value)}
+          ></InputField>
+        </FormInputOne>
+        <ArrowSignDiv onClick={() => handleChangeRouter()}>
+          <ArrowSign></ArrowSign>
+        </ArrowSignDiv>
+        <FormInputOne>
+          <FormInputOneHeading>
+            <HeadingOne>{swapType === true ? "BUST" : "REST"}</HeadingOne>
+            <HeadingOne>
+              Balance:
+              {swapType === true
+                ? parseFloat(bustBalance).toFixed(2)
+                : parseFloat(rustBalance).toFixed(2)}
+            </HeadingOne>
+          </FormInputOneHeading>
+          <InputField
+            placeholder="0.00"
+            value={amountB}
+            onChange={(e) => handleInputTwo(e.target.value)}
+          ></InputField>
+        </FormInputOne>
+        <DetailsBlock
+          bust={initialBUST}
+          rest={initialRUST}
+          slippage={0.5}
+          deadline={15}
         />
+        <SwapButtonDiv>
+          {(!isApprovedRest || !isApprovedBust) && (
+            <SwapButton
+              onClick={() => {
+                approveREST();
+                approveBUST();
+              }}
+              disabled={amountA === ""}
+            >
+              Approve Tokens
+            </SwapButton>
+          )}
+          <SwapButton
+            disabled={!isApprovedBust && !isApprovedRest}
+            onClick={() => handleSwap()}
+          >
+            {swapLoading ? <Spinner fontSize="14px" /> : "Swap Tokens"}
+          </SwapButton>
+        </SwapButtonDiv>
+      </FormContainerMain>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover={false}
+      />
     </>
   );
 };

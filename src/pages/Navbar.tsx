@@ -115,10 +115,8 @@ export default Navbar;
 
 const NavbarContainer = styled.div`
   padding: 12px 24px;
-  position: sticky;
-  top: 0px;
   backdrop-filter: blur(8px);
-  background: rgba(9, 34, 39, 0.5);
+  background: #10363d;
 `;
 
 const NavbarContainerMain = styled.div`
@@ -131,6 +129,8 @@ const NavbarContainerMain = styled.div`
   min-height: auto;
   padding: 0 0 24px 0px;
   transition: all 300ms ease-in-out 0s;
+  position: sticky;
+  top: 0px;
 `;
 
 const NavbarInternal = styled.div`

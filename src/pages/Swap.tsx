@@ -32,6 +32,7 @@ import { bustFactoryAddress } from "../abi/bust"; //BUST
 import { BustRouterAddress } from "../abi/bustRouterABI";
 import { Spinner } from "./Spinner";
 import { ToastContainer, toast } from "react-toastify";
+import { DetailsBlock } from "./DetailsBlock";
 
 const Swap = () => {
   const selector = useSelector((state: any) => state);
@@ -255,14 +256,13 @@ const Swap = () => {
                   onChange={(e) => handleInputTwo(e.target.value)}
                 ></InputField>
               </FormInputOne>
-              <SlipAndToleDiv>
-                <SlippageDiv>Slippage tolerance: 0.5%</SlippageDiv>
-                <SlippageDiv>Transaction deadline: 15 min</SlippageDiv>
-              </SlipAndToleDiv>
-              <BusdAndBustDiv>
-                <SlippageDiv>1BUSD = 2.490698 BUST</SlippageDiv>
-                <SlippageDiv>1BUST = 0.401490 BUSD</SlippageDiv>
-              </BusdAndBustDiv>
+
+              <DetailsBlock
+                bust={0.00}
+                rest={0.00}
+                slippage={0.5}
+                deadline={15}
+              />
               <SwapButtonDiv>
                 <SwapButton onClick={() => handleSwap()}>
                   {swapLoading ? <Spinner fontSize="14px" /> : "Swap Tokens"}

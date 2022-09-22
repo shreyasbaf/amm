@@ -15,7 +15,7 @@ box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
 border-radius: 20px;
 padding: 1rem;
-margin: 40px 0px;
+/* margin: 40px 0px; */
 `;
 
 export const LiquidityInterDiv = styled.div`
@@ -40,6 +40,10 @@ padding: 1rem;
 margin: 0px 10px;
 cursor: pointer;
 border: 1px solid #10363d;
+align-items: center;
+text-align: center;
+min-width: 80px;
+justify-content: center;
 :hover{
   background: #10363dB3;
   color: white;
@@ -139,6 +143,9 @@ background-color:#10363d;
 border: none;
 margin: 10px;
 color: white;
+:hover{
+  opacity: 0.9;
+}
 `;
 
 export const PoolContainerMain = styled.div``;
@@ -150,7 +157,7 @@ justify-content: center;
 padding: 10px;
 `;
 
-export const PercentageButton = styled.div<{ percentage: boolean }>`
+export const PercentageButton = styled.div<any>`
 margin: 5px;
 padding: 5px 10px;
 border: 1px solid rgb(238, 217, 204);
@@ -159,6 +166,11 @@ background: ${(props) => (props.percentage ? '#10363d' : "transparent")};
 border-radius: 10px;
 cursor: pointer;
 border: 1px solid #10363d;
+:hover{
+      background-color: #10363d;
+      color: white;
+      opacity: 0.8;
+    }
 `;
 
 export const PoolTokenContainer = styled.div`
@@ -170,15 +182,17 @@ export const PoolTokenHeading = styled.div`
 display: flex;
 -webkit-box-pack: center;
 justify-content: center;
-color: rebeccapurple;
+color: #10363d;
+margin: 12px 0;
 `;
 
 export const ValueAndToken = styled.div`
 display: flex;
 -webkit-box-pack: justify;
-justify-content: space-between;
+/* justify-content: space-between; */
 -webkit-box-align: center;
 align-items: center;
+margin: 2px 0;
 `;
 
 export const Value = styled.span`
@@ -189,11 +203,13 @@ font-family: 'Inter', sans-serif;
 export const Token = styled.span`
 font-size: 16px;
 font-family: 'Inter', sans-serif;
+width: 30%;
+line-height: 20px;
 `;
 
 export const PriceShare = styled.div`
   padding: 12px 16px 36px 16px;
-  margin-top: 24px;
+  margin-top: 16px;
   background-color: #10363d;
   border-radius: 16px 16px 0 0;
   color: white;
@@ -210,10 +226,10 @@ export const PriceShareBottom = styled.div`
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 12px;
-  min-height: 54px;
+  min-height: 44px;
 `;
 
-export const InitialValues = styled.div`
+export const InitialValues = styled.div<any>`
   align-items: center;
   text-align: center;
   font-size: 14px;
@@ -223,7 +239,8 @@ export const InitialValues = styled.div`
     font-size: 20px;
     border: none;
     margin: 0 12px;
-    cursor: pointer;
+    /* cursor: pointer; */
+    cursor: ${(props) => props.disabled ? 'not-allowed' : 'pointer'};
     padding: 4px 12px;
     border-radius: 8px;
     :hover{
@@ -247,4 +264,53 @@ cursor: pointer;
       opacity: 0.8;
       /* border: 1px solid white; */
     }
+`;
+export const RangeSlider = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin-top: 12px; */
+  flex-direction: column;
+  h4{
+    font-size: 24px;
+    margin: 16px 0;
+    color: #10363d;
+  }
+  .slider {
+    -webkit-appearance: none;
+    width: 75%;
+  height: 5px;
+  border-radius: 5px;
+  background: #10363dCC;
+  outline: none;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10363d;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10363d;
+  cursor: pointer;
+}
+
+.slider::-moz-range-progress {
+  background-color: black; 
+}
+.slider::-moz-range-track {  
+  background-color: red;
+}
 `;

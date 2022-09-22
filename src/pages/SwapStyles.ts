@@ -14,7 +14,7 @@ box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
 border-radius: 20px;
 padding: 1rem;
-margin: 40px 0px;
+/* margin: 40px 0px; */
 `;
 
 export const SwapInterDiv = styled.div`

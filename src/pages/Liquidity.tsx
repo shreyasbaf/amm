@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { BustRouterAddress } from "../abi/bustRouterABI";
 import { wbnbAddress } from "../abi/rest"; // REST
 import { bustFactoryAddress } from "../abi/bust"; //BUST
@@ -16,7 +16,6 @@ import {
   AddHeading,
   ArrowSign,
   ArrowSignDiv,
-  BusdAndBustDiv,
   FormContainerMain,
   FormInputOne,
   FormInputOneHeading,
@@ -35,28 +34,21 @@ import {
   PoolTokenHeading,
   PriceShare,
   PriceShareBottom,
-  SlipAndToleDiv,
-  SlippageDiv,
+  RangeSlider,
   SwapButton,
   SwapButtonDiv,
   Token,
   Value,
   ValueAndToken,
 } from "./LiquidityStyles";
-import {
-  decrementSlippage,
-  incrementSlippage,
-} from "../logic/action/slippage.action";
-import {
-  decrementDeadline,
-  incrementDeadline,
-} from "../logic/action/deadline.action";
+import { DetailsBlock } from "./DetailsBlock";
+import Swap from "./Swap";
 
 const Liquidity = () => {
   const BUSTAddress = bustFactoryAddress;
   const RESTAddress = wbnbAddress;
   const [active, setActive] = useState("Add");
-  const [percentage, setPercentage] = useState(50);
+  const [percentage, setPercentage] = useState<any>(50);
   const [rest, setRest] = useState("");
   const [bust, setBust] = useState("");
   const [balancerest, setbalancerest] = useState("0.00");
@@ -84,11 +76,11 @@ const Liquidity = () => {
   const [tokenB, setTokenB] = useState<any>();
   const [selectedtokenA, setSelectedTokenA] = useState<any>();
   const [selectedtokenB, setSelectedTokenB] = useState<any>();
-  const [detailsType, setDetailsType] = useState("pool");
   const [initlalREST, setInitlalREST] = useState("");
   const [initialBust, setInitialBust] = useState("");
 
-  const dispatch = useDispatch();
+  const [isRemoveAllowed, setIsRemoveAllowed] = useState(false);
+
   /** useEffect to get Reserves */
   const getReserve = async () => {
     try {
@@ -312,7 +304,8 @@ const Liquidity = () => {
       setSelectedTokenB(Number(tokenB) * (percentage / 100));
       setSelectedTokenA(Number(tokenA) * (percentage / 100));
     }
-  }, [percentage, selectedLP]);
+    removeAllowance();
+  }, [percentage, selectedLP, tokenB, tokenA]);
 
   /**function to get totalSupply */
   const getTotalSupply = async () => {
@@ -332,17 +325,43 @@ const Liquidity = () => {
     }
   };
 
+  const [approveLoading, setApproveLoading] = useState(false);
+
   const approvePair = async () => {
     try {
-      const approve = await BustPair.methods
-        .approve(BustRouterAddress, ethToWei(selectedLP))
-        .send({ from: address })
-        .on("receipt", function () {
-          approveSuccess();
-        })
-        .on("error", function () {
-          approveFailure();
-        });
+      if (selectedLP) {
+        setApproveLoading(true);
+        const approve = await BustPair.methods
+          .approve(BustRouterAddress, ethToWei(selectedLP))
+          .send({ from: address })
+          .on("receipt", function () {
+            approveSuccess();
+            removeAllowance();
+            setApproveLoading(false);
+          })
+          .on("error", function () {
+            approveFailure();
+            removeAllowance();
+            setApproveLoading(false);
+          });
+        setApproveLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setApproveLoading(false);
+    }
+  };
+
+  const removeAllowance = async () => {
+    try {
+      const allowance = await BustPair.methods
+        .allowance(address, BustRouterAddress)
+        .call();
+      if (parseFloat(weiToEth(allowance)) >= parseFloat(selectedLP)) {
+        setIsRemoveAllowed(true);
+      } else {
+        setIsRemoveAllowed(false);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -350,24 +369,26 @@ const Liquidity = () => {
 
   const removeLiquidity = async () => {
     try {
-      await approvePair();
-      const remove = await RouterBust.methods
-        .removeLiquidity(
-          RESTAddress,
-          BUSTAddress,
-          ethToWei(selectedLP),
-          convertToMin(selectedtokenA, slippage),
-          convertToMin(selectedtokenB, slippage),
-          address,
-          Date.now() + 900
-        )
-        .send({ from: address })
-        .on("receipt", function () {
-          approveSuccess();
-        })
-        .on("error", function () {
-          approveFailure();
-        });
+      // await approvePair();
+      if (selectedLP && selectedtokenA && selectedtokenB) {
+        const remove = await RouterBust.methods
+          .removeLiquidity(
+            RESTAddress,
+            BUSTAddress,
+            ethToWei(selectedLP),
+            convertToMin(selectedtokenA, slippage),
+            convertToMin(selectedtokenB, slippage),
+            address,
+            Date.now() + 900
+          )
+          .send({ from: address })
+          .on("receipt", function () {
+            approveSuccess();
+          })
+          .on("error", function () {
+            approveFailure();
+          });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -401,8 +422,18 @@ const Liquidity = () => {
                   Remove Liquidity
                 </AddHeading>
               )}
+              {/* <AddHeading
+                  onClick={() => {
+                    setActive("Swap");
+                    getTotalSupply();
+                    getInitials();
+                  }}
+                  active={active === "Swap"}
+                >
+                  Swap
+                </AddHeading> */}
             </HeadingButtonDiv>
-
+            {active === "Swap" && <Swap />}
             {active === "Add" && (
               <FormContainerMain>
                 <FormInputOne>
@@ -440,151 +471,89 @@ const Liquidity = () => {
                     }}
                   ></InputField>
                 </FormInputOne>
+                <DetailsBlock
+                  bust={initialBust}
+                  rest={initlalREST}
+                  slippage={slippage}
+                  deadline={deadline}
+                />
               </FormContainerMain>
             )}
             {active === "remove" && (
               <>
                 <PoolContainerMain>
+                  <RangeSlider>
+                    <h4>{percentage} %</h4>
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      value={percentage}
+                      className="slider"
+                      id="myRange"
+                      onChange={(e) => setPercentage(e.target.value)}
+                    />
+                  </RangeSlider>
                   <FourButtonDiv>
-                    <PercentageButton
-                      onClick={() => setPercentage(25)}
-                      percentage={percentage === 25}
-                    >
+                    <PercentageButton onClick={() => setPercentage(25)}>
                       25%
                     </PercentageButton>
-                    <PercentageButton
-                      onClick={() => setPercentage(50)}
-                      percentage={percentage === 50}
-                    >
+                    <PercentageButton onClick={() => setPercentage(50)}>
                       50%
                     </PercentageButton>
-                    <PercentageButton
-                      onClick={() => setPercentage(75)}
-                      percentage={percentage === 75}
-                    >
+                    <PercentageButton onClick={() => setPercentage(75)}>
                       75%
                     </PercentageButton>
-                    <PercentageButton
-                      onClick={() => setPercentage(100)}
-                      percentage={percentage === 100}
-                    >
+                    <PercentageButton onClick={() => setPercentage(100)}>
                       Max
                     </PercentageButton>
                   </FourButtonDiv>
-                  <PoolTokenContainer>
-                    <PoolTokenHeading>Pooled Tokens</PoolTokenHeading>
-                    <ValueAndToken>
-                      <Value>{parseFloat(bustlp).toFixed(4)}</Value>
-                      <Token>BUST-LP</Token>
-                    </ValueAndToken>
-                    <ValueAndToken>
-                      <Value>{parseFloat(tokenA).toFixed(4)}</Value>
-                      <Token>REST</Token>
-                    </ValueAndToken>
-                    <ValueAndToken>
-                      <Value>{parseFloat(tokenB).toFixed(4)}</Value>
-                      <Token>BUST</Token>
-                    </ValueAndToken>
-                  </PoolTokenContainer>
-                  <PoolTokenContainer>
-                    <PoolTokenHeading>Selected Tokens</PoolTokenHeading>
-                    <ValueAndToken>
-                      <Value>
-                        {(selectedLP && parseFloat(selectedLP).toFixed(4)) ||
-                          Number(bustlp) * (50 / 100) ||
-                          0.0}
-                      </Value>
-                      <Token>BUST-LP</Token>
-                    </ValueAndToken>
-                    <ValueAndToken>
-                      <Value>
-                        {(selectedtokenA &&
-                          parseFloat(selectedtokenA).toFixed(4)) ||
-                          Number(tokenA) * (50 / 100) ||
-                          0.0}
-                      </Value>
-                      <Token>REST</Token>
-                    </ValueAndToken>
-                    <ValueAndToken>
-                      <Value>
-                        {(selectedtokenB &&
-                          parseFloat(selectedtokenB).toFixed(4)) ||
-                          Number(tokenB) * (50 / 100) ||
-                          0.0}
-                      </Value>
-                      <Token>BUST</Token>
-                    </ValueAndToken>
-                  </PoolTokenContainer>
+                  <PriceShare>
+                    <OptionsDiv>Pooled Tokens</OptionsDiv>
+                  </PriceShare>
+                  <PriceShareBottom>
+                    <InitialValues>
+                      {parseFloat(bustlp).toFixed(4)}
+                      <br /> Pool Tokens
+                    </InitialValues>
+                    <InitialValues>
+                      {parseFloat(tokenA).toFixed(4)}
+                      <br /> Pool REST
+                    </InitialValues>
+                    <InitialValues>
+                      {parseFloat(tokenB).toFixed(4)}
+                      <br /> Pool BUST
+                    </InitialValues>
+                  </PriceShareBottom>
+
+                  <PriceShare>
+                    <OptionsDiv>Selected Tokens</OptionsDiv>
+                  </PriceShare>
+                  <PriceShareBottom>
+                    <InitialValues>
+                      {(selectedLP && parseFloat(selectedLP).toFixed(4)) ||
+                        Number(bustlp) * (50 / 100) ||
+                        0.0}{" "}
+                      <br /> Pool Tokens
+                    </InitialValues>
+                    <InitialValues>
+                      {(selectedtokenA &&
+                        parseFloat(selectedtokenA).toFixed(4)) ||
+                        Number(tokenA) * (50 / 100) ||
+                        0.0}{" "}
+                      <br /> Pool REST
+                    </InitialValues>
+                    <InitialValues>
+                      {(selectedtokenB &&
+                        parseFloat(selectedtokenB).toFixed(4)) ||
+                        Number(tokenB) * (50 / 100) ||
+                        0.0}{" "}
+                      <br /> Pool BUST
+                    </InitialValues>
+                  </PriceShareBottom>
                 </PoolContainerMain>
               </>
             )}
-            <PriceShare>
-              <OptionsDiv
-                active={detailsType === "pool"}
-                onClick={() => {
-                  setDetailsType("pool");
-                  getInitials();
-                }}
-              >
-                Pool Details
-              </OptionsDiv>
-              <OptionsDiv
-                active={detailsType === "settings"}
-                onClick={() => {
-                  setDetailsType("settings");
-                  getInitials();
-                }}
-              >
-                Settings
-              </OptionsDiv>
-            </PriceShare>
-            <PriceShareBottom>
-              {detailsType === "pool" ? (
-                <>
-                  <InitialValues>
-                    {initialBust || "--"}
-                    <br /> BUST per REST
-                  </InitialValues>
-                  <InitialValues>
-                    {initlalREST || "--"}
-                    <br /> REST per BUST
-                  </InitialValues>
-                  <InitialValues>
-                    {" "}
-                    -- <br /> Share of Pool
-                  </InitialValues>
-                </>
-              ) : (
-                <>
-                  <InitialValues>
-                    {" "}
-                    <button onClick={() => dispatch(decrementSlippage())}>
-                      {" "}
-                      -{" "}
-                    </button>{" "}
-                    {slippage} %{" "}
-                    <button onClick={() => dispatch(incrementSlippage())}>
-                      {" "}
-                      +{" "}
-                    </button>
-                    <br /> Slippage tolerance{" "}
-                  </InitialValues>
-                  <InitialValues>
-                    {" "}
-                    <button onClick={() => dispatch(decrementDeadline())}>
-                      {" "}
-                      -{" "}
-                    </button>{" "}
-                    {deadline} mins{" "}
-                    <button onClick={() => dispatch(incrementDeadline())}>
-                      {" "}
-                      +{" "}
-                    </button>{" "}
-                    <br /> Transaction deadline
-                  </InitialValues>
-                </>
-              )}
-            </PriceShareBottom>
             {active === "Add" ? (
               <>
                 <SwapButtonDiv>
@@ -608,7 +577,9 @@ const Liquidity = () => {
                     <SwapButton
                       onClick={() => addLiquidity()}
                       disabled={
-                        rest === "" && rest === "" && !addLiquidityLoading
+                        rest === "" ||
+                        bust === "" ||
+                        !(parseFloat(balancerest) > parseFloat(rest))
                       }
                     >
                       {addLiquidityLoading ? (
@@ -622,7 +593,22 @@ const Liquidity = () => {
               </>
             ) : (
               <SwapButtonDiv>
-                <SwapButton onClick={() => removeLiquidity()}>
+                {!isRemoveAllowed ? (
+                  <SwapButton
+                    disabled={isRemoveAllowed}
+                    onClick={() => approvePair()}
+                  >
+                    {!approveLoading ? "Approve" : <Spinner fontSize="14px" />}
+                  </SwapButton>
+                ) : (
+                  <SwapButton style={{ background: "#29AB87" }}>
+                    Approved
+                  </SwapButton>
+                )}
+                <SwapButton
+                  disabled={!isRemoveAllowed}
+                  onClick={() => removeLiquidity()}
+                >
                   Remove
                 </SwapButton>
               </SwapButtonDiv>

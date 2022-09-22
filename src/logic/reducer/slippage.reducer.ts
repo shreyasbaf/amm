@@ -10,7 +10,7 @@ export const slippageReducer = (state = 0.5, action: any) => {
     case INCREMENT_SLIPPAGE:
       return state < 2? state + 0.1 : state
     case DECREMENT_SLIPPAGE:
-      return state > 0.5 ?  state - 0.1 : state
+      return state > 0.2 ?  state - 0.1 : state
     default:
       return state
   }

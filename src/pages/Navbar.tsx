@@ -118,7 +118,7 @@ const NavbarContainerMain = styled.div`
     max-width: 1280px;
     margin: 0px auto;
     min-height: auto;
-    padding: 50px 0px 30px;
+    padding: 24px 0px;
     transition: all 300ms ease-in-out 0s;
 `;
 

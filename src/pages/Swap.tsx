@@ -57,8 +57,8 @@ const Swap = (props: Props) => {
   const RestToBust = [RESTAddress, BUSTAddress];
   const BustToRest = [BUSTAddress, RESTAddress];
   const [routerAddress, setRouterAddress] = useState<any>(RestToBust);
-  const [isApprovedBust, setIsApprovedBust] = useState(true);
-  const [isApprovedRest, setIsApprovedRest] = useState(true);
+  const [isApprovedBust, setIsApprovedBust] = useState(false);
+  const [isApprovedRest, setIsApprovedRest] = useState(false);
 
   const successSwap = () => toast.success("Swap Successfull!");
   const failureSwap = () => toast.error("Error doing Swap!");
@@ -211,13 +211,13 @@ const Swap = (props: Props) => {
     }
   };
 
-  // useEffect(() => {
-  //   if(swapType === true){
-  //     getAllowances(amountA, amountB);
-  //   } else{
-  //     getAllowances(amountB, amountB);
-  //   }
-  // }, [amountA, amountB]);
+  useEffect(() => {
+    if(swapType === true){
+      getAllowances(amountA, amountB);
+    } else{
+      getAllowances(amountB, amountB);
+    }
+  }, [amountA, amountB]);
 
   return (
     <>
@@ -264,7 +264,7 @@ const Swap = (props: Props) => {
                 deadline={15}
               />
               <SwapButtonDiv>
-                <SwapButton onClick={() => handleSwap()}>
+                <SwapButton disabled={!isApprovedBust && !isApprovedRest} onClick={() => handleSwap()}>
                   {swapLoading ? <Spinner fontSize="14px" /> : "Swap Tokens"}
                 </SwapButton>
               </SwapButtonDiv>

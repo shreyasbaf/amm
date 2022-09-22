@@ -1,5 +1,5 @@
 import styled from "styled-components";
-
+import swapImage from "../images/swap.svg"
 export const SwapContainerMain = styled.div`
 display: flex;
 -webkit-box-pack: center;
@@ -41,7 +41,7 @@ cursor: pointer;
 `;
 
 export const ArrowSign = styled.div`
-  background-image: url("https://anmfmt.web.app/static/media/arrow.167534cd.svg");
+  background-image: url(${swapImage});
   background-repeat: no-repeat;
   height: 16px;
   width: 16px;

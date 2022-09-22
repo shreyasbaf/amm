@@ -15,6 +15,7 @@ import {
   disconnectEthWallet,
 } from "../logic/action/wallet.action";
 
+import Logo from '../images/logo2.svg'
 declare let window: any;
 
 const Navbar = () => {
@@ -90,8 +91,8 @@ const Navbar = () => {
         <NavbarContainer>
           <NavbarInternal>
             <LogoDiv>
-              {/* <Logo></Logo> */}
-              <LogoName>Swap Tokens</LogoName>
+              <LogoImg></LogoImg>
+              <LogoName>Sugarcakes</LogoName>
             </LogoDiv>
             <LinkDivMain>
               <Link onClick={() => connectWallet()}>
@@ -144,6 +145,14 @@ const NavbarInternal = styled.div`
 const LogoDiv = styled.div`
   display: flex;
   flex-direction: row;
+`;
+
+const LogoImg = styled.div`
+  background-image: url(${Logo});
+  background-repeat: no-repeat;
+  height: 40px;
+  width: 40px;
+  margin-right: 16px;
 `;
 
 const LogoName = styled.div`

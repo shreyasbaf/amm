@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { theme } from "../styles/theme";
 
 export const LiquidityContainerMain = styled.div`
 display: flex;
@@ -32,7 +33,7 @@ margin-bottom: 12px;
 `;
 
 export const AddHeading = styled.div<{ active: boolean }>`
-background: ${(props) => (props.active ? `#10363d` : 'white')};
+background: ${(props) => (props.active ? `${theme.primaryColor}` : 'white')};
 color: ${(props) => (props.active ? 'white' : "black")};
 box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
@@ -40,7 +41,7 @@ border-radius: 10px;
 padding: 1rem;
 margin: 0px 10px;
 cursor: pointer;
-border: 1px solid #10363d;
+border: 1px solid ${theme.primaryColor};
 align-items: center;
 text-align: center;
 min-width: 80px;
@@ -58,7 +59,7 @@ padding: 16px;
 border-radius: 20px;
 background-color: transparent;
 margin: 10px;
-border: 1px solid #10363d;
+border: 1px solid ${theme.primaryColor};
 transition: all 0.5s linear 0s;
 :hover{
   box-shadow: #10363dB3 2px 2px;
@@ -144,7 +145,7 @@ border-radius: 20px;
 opacity: ${(props) => props.disabled ? '0.7' : '1'} ;
 cursor: ${(props) => props.disabled ? 'not-allowed' : 'pointer'};
 box-shadow: none;
-background-color:#10363d;
+background-color:${theme.primaryColor};
 border: none;
 margin: 10px;
 color: white;
@@ -167,12 +168,12 @@ margin: 5px;
 padding: 5px 10px;
 border: 1px solid rgb(238, 217, 204);
 color: ${(props) => (props.percentage ? 'white' : "black")};;
-background: ${(props) => (props.percentage ? '#10363d' : "transparent")};
+background: ${(props) => (props.percentage ? `${theme.primaryColor}` : "transparent")};
 border-radius: 10px;
 cursor: pointer;
-border: 1px solid #10363d;
+border: 1px solid ${theme.primaryColor};
 :hover{
-      background-color: #10363d;
+      background-color: ${theme.primaryColor};
       color: white;
       opacity: 0.8;
     }
@@ -187,7 +188,7 @@ export const PoolTokenHeading = styled.div`
 display: flex;
 -webkit-box-pack: center;
 justify-content: center;
-color: #10363d;
+color: ${theme.primaryColor};
 margin: 12px 0;
 `;
 
@@ -215,7 +216,7 @@ line-height: 20px;
 export const PriceShare = styled.div`
   padding: 12px 16px 36px 16px;
   margin-top: 16px;
-  background-color: #10363d;
+  background-color: ${theme.primaryColor};
   border-radius: 16px 16px 0 0;
   color: white;
   display: flex;
@@ -227,7 +228,7 @@ export const PriceShareBottom = styled.div`
   padding: 16px;
   background-color: white;
   border-radius: 16px;
-  border: 1px solid #10363d;
+  border: 1px solid ${theme.primaryColor};
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 12px;
@@ -249,7 +250,7 @@ export const InitialValues = styled.div<any>`
     padding: 4px 12px;
     border-radius: 8px;
     :hover{
-      background-color: #10363d;
+      background-color: ${theme.primaryColor};
       color: white;
       opacity: 0.5;
     }
@@ -261,7 +262,7 @@ background-color: ${({active}) =>(active ? 'white' : 'transparent')};
 padding: 6px 20px;
 font-size: 12px;
 font-family: 'Inter', sans-serif;
-color: ${({active}) =>(active ? '#10363d' : 'white')};
+color: ${({active}) =>(active ? `${theme.primaryColor}` : 'white')};
 border-radius: 120px;
 cursor: pointer;
 /* border: 1px solid ${({active}) =>(active ? '#10363d' : 'transparent')}; */
@@ -279,7 +280,7 @@ export const RangeSlider = styled.div`
   h4{
     font-size: 24px;
     margin: 16px 0;
-    color: #10363d;
+    color: ${theme.primaryColor};
   }
   .slider {
     -webkit-appearance: none;
@@ -300,7 +301,7 @@ export const RangeSlider = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #10363d;
+  background: ${theme.primaryColor};
   cursor: pointer;
 }
 
@@ -308,7 +309,7 @@ export const RangeSlider = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #10363d;
+  background: ${theme.primaryColor};
   cursor: pointer;
 }
 

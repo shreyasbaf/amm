@@ -14,8 +14,8 @@ import {
   connectEthWallet,
   disconnectEthWallet,
 } from "../logic/action/wallet.action";
-
 import Logo from '../images/logo2.svg'
+import { theme } from "../styles/theme";
 declare let window: any;
 
 const Navbar = () => {
@@ -116,7 +116,7 @@ export default Navbar;
 const NavbarContainer = styled.div`
   padding: 12px 24px;
   backdrop-filter: blur(8px);
-  background: #10363d;
+  background: ${theme.primaryColor};
 `;
 
 const NavbarContainerMain = styled.div`

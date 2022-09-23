@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import swapImage from "../images/swap.svg"
+import { theme } from "../styles/theme";
 export const SwapContainerMain = styled.div`
 display: flex;
 -webkit-box-pack: center;
@@ -30,7 +31,7 @@ justify-content: center;
 `;
 
 export const SwapHeading = styled.div`
-color: #10363d;
+color: ${theme.primaryColor};
 box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
 border-radius: 10px;
@@ -54,9 +55,9 @@ export const SwapButton = styled.button`
   opacity: ${(props) => (props.disabled ? "0.7" : "1")};
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   box-shadow: none;
-  background-color: #10363d;
+  background-color: ${theme.primaryColor};
   border: none;
   margin: 10px;
   color: white;
-  border: 1px solid #10363d;
+  border: 1px solid ${theme.primaryColor};
 `;

@@ -9,7 +9,7 @@ export const ethToWei = (amount: string, decimals: number = 18) => {
   return new BigNumber(amount).times(10 ** decimals).toFixed()
 }
 
-export const maxAllowance = new BigNumber(2).pow(256).minus(1);
+export const maxAllowance = new BigNumber(2).pow(128).minus(1);
 
 /** function to convert min values of */
 export const convertToMin = (number: any, slippage: any = 0.5 ) => {

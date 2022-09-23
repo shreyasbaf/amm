@@ -185,7 +185,7 @@ const Swap = (props: Props) => {
   const approveREST = async () => {
     try {
       const approvebusd = await REST.methods
-        .approve(BustRouterAddress, maxAllowance)
+        .approve(BustRouterAddress, ethToWei(maxAllowance.toString()))
         .send({ from: address })
         .on("receipt", function () {
           approveSuccess();
@@ -204,7 +204,7 @@ const Swap = (props: Props) => {
   const approveBUST = async () => {
     try {
       const approvebust = await BUST.methods
-        .approve(BustRouterAddress, maxAllowance)
+        .approve(BustRouterAddress, ethToWei(maxAllowance.toString()))
         .send({ from: address })
         .on("receipt", function () {
           approveSuccess();

@@ -46,7 +46,7 @@ const Liquidity = () => {
   const addRecentTransaction = useAddRecentTransaction();
   const BUSTAddress = bustFactoryAddress;
   const RESTAddress = wbnbAddress;
-  const [active, setActive] = useState("Add");
+  const [active, setActive] = useState("Swap");
   const [percentage, setPercentage] = useState<any>(50);
   const [rest, setRest] = useState("");
   const [bust, setBust] = useState("");

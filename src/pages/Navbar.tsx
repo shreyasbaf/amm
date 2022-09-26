@@ -17,7 +17,7 @@ import {
 import Logo from '../images/logo2.svg'
 import { theme } from "../styles/theme";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useBalance, useDisconnect } from "wagmi";
 import { initialRust, initialTokenB } from "../logic/action/Initial.action";
 declare let window: any;
    
@@ -30,7 +30,10 @@ const Navbar = () => {
   const { disconnect } = useDisconnect()
   const selector = useSelector((state: any) => state);
   const { BustPair } = selector;
-
+  // const balance = useBalance({
+  //   addressOrName: '0x92FcaD722206Ba07Fd4C002d81E409E3b1A77546',
+  //   chainId: 97,
+  // })
   const connectWallet = () => {
     if (address) {
       const web3 = new Web3(window.ethereum);
@@ -58,6 +61,7 @@ const Navbar = () => {
 }
   useEffect(() => {
   connectWallet()
+  // console.log(balance, 'balancdd');
   }, [address, isConnected]);
 
   useEffect(() => {
@@ -93,6 +97,7 @@ const Navbar = () => {
                     address?.substring(address.length - 5)
                   : "Connect Wallet"}
               </Link> */}
+              {/* <h4>{balance}</h4> */}
               <ConnectButton />
             </LinkDivMain>
           </NavbarInternal>

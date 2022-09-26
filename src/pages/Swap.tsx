@@ -42,11 +42,16 @@ const Swap = (props: Props) => {
   const [swapType, setSwapType] = useState(true);
   const RESTAddress = wbnbAddress;
   const BUSTAddress = bustFactoryAddress;
+  const WBNBAddress = '0x094616F0BdFB0b526bD735Bf66Eca0Ad254ca81F';
   const RestToBust = [RESTAddress, BUSTAddress];
   const BustToRest = [BUSTAddress, RESTAddress];
+  const RestToWBNB = [RESTAddress, WBNBAddress];
+  const WBNBToRest = [WBNBAddress, RESTAddress];
+
   const [routerAddress, setRouterAddress] = useState<any>(RestToBust);
   const [isApprovedBust, setIsApprovedBust] = useState(false);
   const [isApprovedRest, setIsApprovedRest] = useState(false);
+  const [tokenName, setTokenName] = useState('BUST');
 
   const successSwap = () => toast.success("Swap Successfull!");
   const failureSwap = () => toast.error("Error doing Swap!");
@@ -80,7 +85,7 @@ const Swap = (props: Props) => {
     if (input) {
       setAmountA(input);
       const result = await RouterBust.methods
-        .getAmountsOut(ethToWei(input, 18), routerAddress)
+        .getAmountsOut(ethToWei(input, 18), tokenName === 'WBNB' ?( swapType === true ? RestToWBNB : WBNBToRest )   : routerAddress)
         .call();
       setAmountB(weiToEth(result[1], 18));
       setType(1);
@@ -91,18 +96,18 @@ const Swap = (props: Props) => {
   };
 
   /** function to handle InputTwo */
-  const handleInputTwo = async (input: any) => {
+  const handleInputTwo = async (input: any) => { 
     if (input) {
       setAmountB(input);
       const result = await RouterBust.methods
-        .getAmountsIn(ethToWei(input, 18), routerAddress)
+        .getAmountsIn(ethToWei(input, 18), tokenName === 'WBNB' ? ( swapType === true ? RestToWBNB : WBNBToRest )   : routerAddress)
         .call();
       setAmountA(weiToEth(result[0], 18));
       setType(2);
     } else {
       setAmountA("");
       setAmountB("");
-    }
+    } 
   };
 
   /** function to handle swapExactTokensForTokens */
@@ -169,12 +174,91 @@ const Swap = (props: Props) => {
     }
   };
 
+
+  const swapExactTokensForETH = async () =>{
+    setSwapLoading(true);
+    try {
+      const amountOutMin = convertToMin(amountB, slippage);
+      const dl = Date.now() + ( deadline * 60 );
+      const ExactTokensForTokens = await RouterBust.methods
+        .swapExactTokensForETH(
+          ethToWei(amountA),
+          amountOutMin,
+          RestToWBNB,
+          address,
+          dl
+        )
+        .send({ from: address })
+        .on("receipt", (receipt: any) => {
+          successSwap();
+          setSwapLoading(false);
+          setAmountA("");
+          setAmountB("");
+        })
+        .on("error", (error: any, receipt: any) => {
+          failureSwap();
+          setSwapLoading(false);
+          setAmountA("");
+          setAmountB("");
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const swapExactETHForTokens = async () => {
+    setSwapLoading(true);
+    try {
+      const amountOutMin = convertToMin(amountB, slippage);
+      const dl = Date.now() + ( deadline * 60 );
+      const ExactTokensForTokens = await RouterBust.methods
+        .swapExactETHForTokens(
+          amountA,
+          amountOutMin,
+          WBNBToRest,
+          address,
+          dl
+        )
+        .send({ from: address })
+        .on("receipt", (receipt: any) => {
+          successSwap();
+          setSwapLoading(false);
+          setAmountA("");
+          setAmountB("");
+        })
+        .on("error", (error: any, receipt: any) => {
+          failureSwap();
+          setSwapLoading(false);
+          setAmountA("");
+          setAmountB("");
+        });
+    } catch (err) {
+      setSwapLoading(false);
+      console.log(err);
+    }
+  };
   const handleSwap = () => {
     setSwapLoading(true);
     if (type === 1) {
-      swapExactTokensForTokens();
+      if(tokenName === 'WBNB' ){
+        if(swapType === true){
+          swapExactTokensForETH()
+        }else{
+          swapExactETHForTokens()
+        }
+      }else{
+        swapExactTokensForTokens();
+      }
     } else {
-      swapTokensForExactTokens();
+      if(tokenName === 'WBNB' ){
+        if(swapType === true){
+          swapExactTokensForETH()
+        } else{
+          swapExactETHForTokens()
+        }
+      }else{
+        swapTokensForExactTokens();
+      }
     }
     // setSwapLoading(false)
   };
@@ -257,12 +341,29 @@ const Swap = (props: Props) => {
     }
   }, [amountA, amountB]);
 
+  const handleDropdownChange = (value: any) => {
+    setTokenName(value)
+    setAmountA("");
+    setAmountB("")
+  }
+
   return (
     <>
       <FormContainerMain>
         <FormInputOne>
           <FormInputOneHeading>
-            <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne>
+          {swapType && <HeadingOne>REST</HeadingOne>}
+            {/* <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne> */}
+            {!swapType === true &&
+            <select onChange={(e) => handleDropdownChange(e.target.value)} value={tokenName}>
+            <option value="BUST">
+              BUST
+            </option>
+            <option value="WBNB">
+              WBNB
+            </option>
+            </select>
+          }
             <HeadingOne>
               Balance:
               {swapType === true
@@ -281,7 +382,17 @@ const Swap = (props: Props) => {
         </ArrowSignDiv>
         <FormInputOne>
           <FormInputOneHeading>
-            <HeadingOne>{swapType === true ? "BUST" : "REST"}</HeadingOne>
+            {!swapType && <HeadingOne>REST</HeadingOne>}
+            {swapType === true &&
+            <select onChange={(e) => handleDropdownChange(e.target.value)} value={tokenName}> 
+            <option value="BUST">
+              BUST
+            </option>
+            <option value="WBNB">
+              WBNB
+            </option>
+            </select>
+          }
             <HeadingOne>
               Balance:
               {swapType === true
@@ -295,12 +406,12 @@ const Swap = (props: Props) => {
             onChange={(e) => handleInputTwo(e.target.value)}
           ></InputField>
         </FormInputOne>
-        <DetailsBlock
+        {/* <DetailsBlock
           bust={initialBUST}
           rest={initialRUST}
           slippage={0.5}
           deadline={15}
-        />
+        /> */}
         <SwapButtonDiv>
           {(!isApprovedRest || !isApprovedBust) && (
             <SwapButton

@@ -5,7 +5,7 @@ import { BustRouterAddress, BustRouterABI } from "../abi/bustRouterABI";
 import { BustPairAddress, BustPairABI } from "../abi/bustPairABI";
 import { wbnbAddress, wbnbABI } from "../abi/rest";
 import { bustFactoryAddress, bustFactoryABI } from "../abi/bust";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setrouterabi } from "../logic/action/routerabi.action";
 import { setBustPairabi } from "../logic/action/bustpairabi.action";
 import { setwbnbabi } from "../logic/action/wbnbabi.action";
@@ -16,62 +16,49 @@ import {
 } from "../logic/action/wallet.action";
 import Logo from '../images/logo2.svg'
 import { theme } from "../styles/theme";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from "wagmi";
+import { initialRust, initialTokenB } from "../logic/action/Initial.action";
 declare let window: any;
-
+   
 const Navbar = () => {
-  const [address, setAddress] = useState();
+  // const [address, setAddress] = useState<any>();
   const [openWalletList, setOpenWalletList] = useState(false);
   const [contract, setContract] = useState<any>(null);
   const dispatch = useDispatch();
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect()
+  const selector = useSelector((state: any) => state);
+  const { BustPair } = selector;
 
   const connectWallet = () => {
-  try {
-    if (openWalletList === false) {
-      if (typeof window.ethereum !== "undefined") {
-        window.ethereum
-          .request({ method: "eth_requestAccounts" })
-          .then((accounts: any) => {
-            console.log(accounts);
-            setAddress(accounts[0]);
-            const add = accounts[0];
-            const web3 = new Web3(window.ethereum);
-            if (add) {
-              setOpenWalletList(true);
-              dispatch(connectEthWallet(add));
-              const contract = new web3.eth.Contract(
-                BustRouterABI,
-                BustRouterAddress
-              );
-              const contract2 = new web3.eth.Contract(
-                BustPairABI,
-                BustPairAddress
-              );
-              const contract3 = new web3.eth.Contract(wbnbABI, wbnbAddress);
-              const contract4 = new web3.eth.Contract(
-                bustFactoryABI,
-                bustFactoryAddress
-              );
-              dispatch(setrouterabi(contract));
-              dispatch(setBustPairabi(contract2));
-              dispatch(setwbnbabi(contract3));
-              dispatch(setBustFactoryabi(contract4));
-              setContract(contract);
-            }
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      }
+    if (address) {
+      const web3 = new Web3(window.ethereum);
+      setOpenWalletList(true);
+      dispatch(connectEthWallet(address));
+      const contract = new web3.eth.Contract(
+        BustRouterABI,
+        BustRouterAddress
+      );
+      const contract2 = new web3.eth.Contract(
+        BustPairABI,
+        BustPairAddress
+      );
+      const contract3 = new web3.eth.Contract(wbnbABI, wbnbAddress);
+      const contract4 = new web3.eth.Contract(
+        bustFactoryABI,
+        bustFactoryAddress
+      );
+      dispatch(setrouterabi(contract));
+      dispatch(setBustPairabi(contract2));
+      dispatch(setwbnbabi(contract3));
+      dispatch(setBustFactoryabi(contract4));
+      setContract(contract);
     }
-  } catch (err) {
-    dispatch(disconnectEthWallet());
-    setOpenWalletList(false);
-    console.log(err);
-  }
 }
   useEffect(() => {
   connectWallet()
-  }, []);
+  }, [address, isConnected]);
 
   useEffect(() => {
     const getWETH = async () => {
@@ -95,14 +82,18 @@ const Navbar = () => {
               <LogoName>Sugarcakes</LogoName>
             </LogoDiv>
             <LinkDivMain>
-              <Link onClick={() => connectWallet()}>
+            {/* <Link onClick={() => disconnect()}>
+              Disconnect
+              </Link> */}
+              {/* <Link onClick={() => connectWallet()}>
                 {address
                   ? //@ts-ignore
                     address?.slice(0, 3) +
                     "..." + //@ts-ignore
                     address?.substring(address.length - 5)
                   : "Connect Wallet"}
-              </Link>
+              </Link> */}
+              <ConnectButton />
             </LinkDivMain>
           </NavbarInternal>
         </NavbarContainer>

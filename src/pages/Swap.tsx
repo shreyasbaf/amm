@@ -23,8 +23,6 @@ import { BustRouterAddress } from "../abi/bustRouterABI";
 import { Spinner } from "./Spinner";
 import { ToastContainer, toast } from "react-toastify";
 import { DetailsBlock } from "./DetailsBlock";
-import { INITIALBUST, INITIALRUST } from "../logic/action/actiontype";
-
 interface Props {
   initialRUST: any;
   initialBUST: any;
@@ -33,7 +31,7 @@ interface Props {
 const Swap = (props: Props) => {
   const { initialRUST, initialBUST } = props;
   const selector = useSelector((state: any) => state);
-  const { RouterBust, REST, BUST, slippage } = selector;
+  const { RouterBust, REST, BUST, slippage, deadline } = selector;
   const { address } = selector.wallet;
   const [rustBalance, setRustBalance] = useState("0.00");
   const [bustBalance, setBustBalance] = useState("0.00");
@@ -112,14 +110,14 @@ const Swap = (props: Props) => {
     setSwapLoading(true);
     try {
       const amountOutMin = convertToMin(amountB, slippage);
-      const deadline = Date.now() + 900;
+      const dl = Date.now() + ( deadline * 60 );
       const ExactTokensForTokens = await RouterBust.methods
         .swapExactTokensForTokens(
           ethToWei(amountA),
           amountOutMin,
           routerAddress,
           address,
-          deadline
+          dl
         )
         .send({ from: address })
         .on("receipt", (receipt: any) => {
@@ -144,14 +142,14 @@ const Swap = (props: Props) => {
     setSwapLoading(true);
     try {
       const amountInMax = convertToMax(amountA, slippage);
-      const deadline = Date.now() + 900;
+      const dl = Date.now() + (deadline * 60);
       const ExactTokensForTokens = await RouterBust.methods
         .swapTokensForExactTokens(
           ethToWei(amountB),
           amountInMax,
           routerAddress,
           address,
-          deadline
+          dl
         )
         .send({ from: address })
         .on("receipt", (receipt: any) => {

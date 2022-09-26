@@ -24,3 +24,13 @@ export const convertToMax = (number: any, slippage: any = 0.5) => {
     const convertToWei = ethToWei(convert, 18);
     return convertToWei;
 };
+
+export const getReserve = async (props:any) => {
+  const { BustPair } = props;
+  try {
+    const res = await BustPair.methods.getReserves().call();
+    return {res1: res._reserve0 , res2: res.reserve1} 
+  } catch (err) {
+    console.log(err);
+  }
+};

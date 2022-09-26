@@ -38,8 +38,12 @@ import {
 } from "./LiquidityStyles";
 import { DetailsBlock } from "./DetailsBlock";
 import Swap from "./Swap";
+import { useAccount } from "wagmi";
+import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 
 const Liquidity = () => {
+  const { isConnected, address } = useAccount();
+  const addRecentTransaction = useAddRecentTransaction();
   const BUSTAddress = bustFactoryAddress;
   const RESTAddress = wbnbAddress;
   const [active, setActive] = useState("Add");
@@ -57,7 +61,7 @@ const Liquidity = () => {
   const [bustR, setBustR] = useState<string>();
   const selector = useSelector((state: any) => state);
   const { RouterBust, REST, BUST, BustPair, slippage, deadline } = selector;
-  const { address } = selector.wallet;
+  // const { address } = selector.wallet;
   const [selectedLP, setSelectedLP] = useState<any>();
   const [addLiquidityLoading, setAddLiquidityLoading] = useState(false);
   const [isLiquidityAdded, setisLiquidityAdded] = useState(false);
@@ -93,7 +97,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getReserve();
-  }, [BustPair]);
+  }, [BustPair, address]);
 
   const getInitials = async () => {
     try {
@@ -118,7 +122,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getInitials();
-  }, [RouterBust, reserve1, reserve0]);
+  }, [RouterBust, reserve1, reserve0, address]);
 
   /** function to get balance of tokens */
   const getTokenBalance = async () => {
@@ -134,7 +138,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getTokenBalance();
-  }, [REST, BUST, address, addLiquidityLoading, isRemoveLiquidityLoading]);
+  }, [REST, BUST, address, addLiquidityLoading, isRemoveLiquidityLoading, address]);
 
   /**  function to get quote values */
   const getQuoteBusd = async (bust: any) => {
@@ -256,7 +260,7 @@ const Liquidity = () => {
           aMin,
           bMin,
           address,
-          Date.now() + 900
+          Date.now() + (deadline * 60)
         )
         .send({ from: address })
         .on("receipt", function () {
@@ -351,6 +355,12 @@ const Liquidity = () => {
         const approve = await BustPair.methods
           .approve(BustRouterAddress, ethToWei(selectedLP))
           .send({ from: address })
+          .on('transactionHash', function(hash:any){
+            addRecentTransaction({
+              hash: `${hash}`,
+              description: 'Pair Approved',
+            });
+        })
           .on("receipt", function () {
             approveSuccess();
             removeAllowance();
@@ -382,7 +392,7 @@ const Liquidity = () => {
             convertToMin(selectedtokenA, slippage),
             convertToMin(selectedtokenB, slippage),
             address,
-            Date.now() + 900
+            Date.now() + (deadline * 60)
           )
           .send({ from: address })
           .on("receipt", function () {
@@ -401,9 +411,10 @@ const Liquidity = () => {
       setIsRemoveLiquidityLoading(false)
     }
   };
-
   return (
     <>
+        {isConnected ? 
+        <>
             <HeadingButtonDiv>
               <AddHeading
                 onClick={() => setActive("Add")}
@@ -583,7 +594,8 @@ const Liquidity = () => {
                       disabled={
                         rest === "" ||
                         bust === "" ||
-                        !(parseFloat(balancerest) > parseFloat(rest))
+                        !(parseFloat(balancerest) > parseFloat(rest)) ||
+                        !(parseFloat(balancebust) > parseFloat(bust))
                       }
                     >
                       {addLiquidityLoading ? (
@@ -631,7 +643,10 @@ const Liquidity = () => {
           draggable
           pauseOnHover={false}
         />
-      </LiquidityContainerMain>
+      </LiquidityContainerMain> 
+    </> : <HeadingButtonDiv>
+    <ConnectButton /> 
+    </HeadingButtonDiv>}
     </>
   );
 };

@@ -34,9 +34,10 @@ const Navbar = () => {
   //   addressOrName: '0x92FcaD722206Ba07Fd4C002d81E409E3b1A77546',
   //   chainId: 97,
   // })
-  const connectWallet = () => {
+  const connectWallet = async () => {
     if (address) {
       const web3 = new Web3(window.ethereum);
+      console.log(await web3.eth.getBalance(address), 'balof');
       setOpenWalletList(true);
       dispatch(connectEthWallet(address));
       const contract = new web3.eth.Contract(
@@ -66,12 +67,14 @@ const Navbar = () => {
 
   useEffect(() => {
     const getWETH = async () => {
+      if(contract){
       try {
         const weth = await contract.methods.WETH().call();
         console.log(weth);
       } catch (err) {
         console.log(err);
       }
+    }
     };
     getWETH();
   }, [contract]);

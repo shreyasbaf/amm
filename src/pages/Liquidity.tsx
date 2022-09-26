@@ -56,17 +56,13 @@ const Liquidity = () => {
   const [reserve1, setReserve1] = useState<any>();
   const [isApprovedBust, setIsApprovedBust] = useState(true);
   const [isApprovedRest, setIsApprovedRest] = useState(true);
-  // const [amount1, setAmount1] = useState();
   const [bustlp, setBustlp] = useState<any>();
-  const [bustR, setBustR] = useState<string>();
   const selector = useSelector((state: any) => state);
   const { RouterBust, REST, BUST, BustPair, slippage, deadline } = selector;
-  // const { address } = selector.wallet;
   const [selectedLP, setSelectedLP] = useState<any>();
   const [addLiquidityLoading, setAddLiquidityLoading] = useState(false);
   const [isLiquidityAdded, setisLiquidityAdded] = useState(false);
   const [totalSupply, setTotalSupply] = useState<any>("");
-  // const slippageVal = slippage
   const [tokenA, setTokenA] = useState<any>();
   const [tokenB, setTokenB] = useState<any>();
   const [selectedtokenA, setSelectedTokenA] = useState<any>();
@@ -86,12 +82,15 @@ const Liquidity = () => {
   const removeFailure = () => toast.error("Error removing Liquidity!");
   /** useEffect to get Reserves */
   const getReserve = async () => {
-    try {
-      const res = await BustPair.methods.getReserves().call();
-      setReserve0(res._reserve0);
-      setReserve1(res._reserve1);
-    } catch (err) {
-      console.log(err);
+    if(BustPair){
+
+      try {
+        const res = await BustPair.methods.getReserves().call();
+        setReserve0(res._reserve0);
+        setReserve1(res._reserve1);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
@@ -263,6 +262,12 @@ const Liquidity = () => {
           Date.now() + (deadline * 60)
         )
         .send({ from: address })
+        .on('transactionHash', function(hash:any){
+          addRecentTransaction({
+            hash: `${hash}`,
+            description: 'Add Liquidity',
+          });
+      })
         .on("receipt", function () {
           success();
           setAddLiquidityLoading(false);
@@ -358,7 +363,7 @@ const Liquidity = () => {
           .on('transactionHash', function(hash:any){
             addRecentTransaction({
               hash: `${hash}`,
-              description: 'Pair Approved',
+              description: 'Approve Pool Tokens',
             });
         })
           .on("receipt", function () {
@@ -395,6 +400,12 @@ const Liquidity = () => {
             Date.now() + (deadline * 60)
           )
           .send({ from: address })
+          .on('transactionHash', function(hash:any){
+            addRecentTransaction({
+              hash: `${hash}`,
+              description: 'Remove Liquidity',
+            });
+        })
           .on("receipt", function () {
             removeSuccess();
             setPercentage(50);
@@ -448,7 +459,7 @@ const Liquidity = () => {
       <LiquidityContainerMain>
         <LiquidityOuterDiv>
           <LiquidityInterDiv>
-            {active === "Swap" && <Swap initialBUST={initialBust} initialRUST={initlalREST} />}
+            {active === "Swap" && <Swap />}
             {active === "Add" && (
               <FormContainerMain>
                 <FormInputOne>

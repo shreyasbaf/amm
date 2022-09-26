@@ -22,15 +22,12 @@ import { bustFactoryAddress } from "../abi/bust"; //BUST
 import { BustRouterAddress } from "../abi/bustRouterABI";
 import { Spinner } from "./Spinner";
 import { ToastContainer, toast } from "react-toastify";
-import { DetailsBlock } from "./DetailsBlock";
-interface Props {
-  initialRUST: any;
-  initialBUST: any;
-}
+import { useBalance } from "wagmi";
+import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 
-const Swap = (props: Props) => {
-  const { initialRUST, initialBUST } = props;
+const Swap = () => {
   const selector = useSelector((state: any) => state);
+  const addRecentTransaction = useAddRecentTransaction()
   const { RouterBust, REST, BUST, slippage, deadline } = selector;
   const { address } = selector.wallet;
   const [rustBalance, setRustBalance] = useState("0.00");
@@ -42,7 +39,7 @@ const Swap = (props: Props) => {
   const [swapType, setSwapType] = useState(true);
   const RESTAddress = wbnbAddress;
   const BUSTAddress = bustFactoryAddress;
-  const WBNBAddress = '0x094616F0BdFB0b526bD735Bf66Eca0Ad254ca81F';
+  const WBNBAddress = "0x094616F0BdFB0b526bD735Bf66Eca0Ad254ca81F";
   const RestToBust = [RESTAddress, BUSTAddress];
   const BustToRest = [BUSTAddress, RESTAddress];
   const RestToWBNB = [RESTAddress, WBNBAddress];
@@ -51,7 +48,7 @@ const Swap = (props: Props) => {
   const [routerAddress, setRouterAddress] = useState<any>(RestToBust);
   const [isApprovedBust, setIsApprovedBust] = useState(false);
   const [isApprovedRest, setIsApprovedRest] = useState(false);
-  const [tokenName, setTokenName] = useState('BUST');
+  const [tokenName, setTokenName] = useState("BUST");
 
   const successSwap = () => toast.success("Swap Successfull!");
   const failureSwap = () => toast.error("Error doing Swap!");
@@ -60,18 +57,27 @@ const Swap = (props: Props) => {
 
   /** function to get balance of tokens */
   const getTokenBalance = async () => {
-    try {
-      const Rest = await REST.methods.balanceOf(address).call();
-      setRustBalance(weiToEth(Rest, 18));
-      const bust = await BUST.methods.balanceOf(address).call();
-      setBustBalance(weiToEth(bust, 18));
-    } catch (err) {
-      console.log(err);
+    if (address) {
+      try {
+        const Rest = await REST.methods.balanceOf(address).call();
+        setRustBalance(weiToEth(Rest, 18));
+        const bust = await BUST.methods.balanceOf(address).call();
+        setBustBalance(weiToEth(bust, 18));
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
+  const balance: any = useBalance({
+    addressOrName: address,
+  });
+
   /** function to change the swap of tokens */
   const handleChangeRouter = () => {
+    setAmountA("");
+    setAmountB("");
+    setIsApprovedRest(false);
     setSwapType(!swapType);
     if (!swapType) {
       setRouterAddress(RestToBust);
@@ -85,7 +91,14 @@ const Swap = (props: Props) => {
     if (input) {
       setAmountA(input);
       const result = await RouterBust.methods
-        .getAmountsOut(ethToWei(input, 18), tokenName === 'WBNB' ?( swapType === true ? RestToWBNB : WBNBToRest )   : routerAddress)
+        .getAmountsOut(
+          ethToWei(input, 18),
+          tokenName === "WBNB"
+            ? swapType === true
+              ? RestToWBNB
+              : WBNBToRest
+            : routerAddress
+        )
         .call();
       setAmountB(weiToEth(result[1], 18));
       setType(1);
@@ -96,18 +109,25 @@ const Swap = (props: Props) => {
   };
 
   /** function to handle InputTwo */
-  const handleInputTwo = async (input: any) => { 
+  const handleInputTwo = async (input: any) => {
     if (input) {
       setAmountB(input);
       const result = await RouterBust.methods
-        .getAmountsIn(ethToWei(input, 18), tokenName === 'WBNB' ? ( swapType === true ? RestToWBNB : WBNBToRest )   : routerAddress)
+        .getAmountsIn(
+          ethToWei(input, 18),
+          tokenName === "WBNB"
+            ? swapType === true
+              ? RestToWBNB
+              : WBNBToRest
+            : routerAddress
+        )
         .call();
       setAmountA(weiToEth(result[0], 18));
       setType(2);
     } else {
       setAmountA("");
       setAmountB("");
-    } 
+    }
   };
 
   /** function to handle swapExactTokensForTokens */
@@ -115,7 +135,7 @@ const Swap = (props: Props) => {
     setSwapLoading(true);
     try {
       const amountOutMin = convertToMin(amountB, slippage);
-      const dl = Date.now() + ( deadline * 60 );
+      const dl = Date.now() + deadline * 60;
       const ExactTokensForTokens = await RouterBust.methods
         .swapExactTokensForTokens(
           ethToWei(amountA),
@@ -125,6 +145,12 @@ const Swap = (props: Props) => {
           dl
         )
         .send({ from: address })
+        .on('transactionHash', function(hash:any){
+          addRecentTransaction({
+            hash: `${hash}`,
+            description: 'Swap Tokens',
+          });
+      })
         .on("receipt", (receipt: any) => {
           successSwap();
           setSwapLoading(false);
@@ -138,6 +164,7 @@ const Swap = (props: Props) => {
           setAmountB("");
         });
     } catch (err) {
+      setSwapLoading(false);
       console.log(err);
     }
   };
@@ -147,7 +174,7 @@ const Swap = (props: Props) => {
     setSwapLoading(true);
     try {
       const amountInMax = convertToMax(amountA, slippage);
-      const dl = Date.now() + (deadline * 60);
+      const dl = Date.now() + deadline * 60;
       const ExactTokensForTokens = await RouterBust.methods
         .swapTokensForExactTokens(
           ethToWei(amountB),
@@ -157,6 +184,12 @@ const Swap = (props: Props) => {
           dl
         )
         .send({ from: address })
+        .on('transactionHash', function(hash:any){
+          addRecentTransaction({
+            hash: `${hash}`,
+            description: 'Swap Tokens',
+          });
+      })
         .on("receipt", (receipt: any) => {
           successSwap();
           setSwapLoading(false);
@@ -170,16 +203,16 @@ const Swap = (props: Props) => {
           setAmountB("");
         });
     } catch (err) {
+      setSwapLoading(false);
       console.log(err);
     }
   };
 
-
-  const swapExactTokensForETH = async () =>{
+  const swapExactTokensForETH = async () => {
     setSwapLoading(true);
     try {
       const amountOutMin = convertToMin(amountB, slippage);
-      const dl = Date.now() + ( deadline * 60 );
+      const dl = Date.now() + deadline * 60;
       const ExactTokensForTokens = await RouterBust.methods
         .swapExactTokensForETH(
           ethToWei(amountA),
@@ -189,6 +222,12 @@ const Swap = (props: Props) => {
           dl
         )
         .send({ from: address })
+        .on('transactionHash', function(hash:any){
+          addRecentTransaction({
+            hash: `${hash}`,
+            description: 'Swap Native Tokens',
+          });
+      })
         .on("receipt", (receipt: any) => {
           successSwap();
           setSwapLoading(false);
@@ -202,24 +241,25 @@ const Swap = (props: Props) => {
           setAmountB("");
         });
     } catch (err) {
+      setSwapLoading(false);
       console.log(err);
     }
-  }
+  };
 
   const swapExactETHForTokens = async () => {
     setSwapLoading(true);
     try {
       const amountOutMin = convertToMin(amountB, slippage);
-      const dl = Date.now() + ( deadline * 60 );
+      const dl = Date.now() + deadline * 60;
       const ExactTokensForTokens = await RouterBust.methods
-        .swapExactETHForTokens(
-          amountA,
-          amountOutMin,
-          WBNBToRest,
-          address,
-          dl
-        )
-        .send({ from: address })
+        .swapExactETHForTokens(amountOutMin, WBNBToRest, address, dl)
+        .send({ from: address, value: ethToWei(amountA) })
+        .on('transactionHash', function(hash:any){
+          addRecentTransaction({
+            hash: `${hash}`,
+            description: 'Swap Native Tokens',
+          });
+      })
         .on("receipt", (receipt: any) => {
           successSwap();
           setSwapLoading(false);
@@ -240,23 +280,23 @@ const Swap = (props: Props) => {
   const handleSwap = () => {
     setSwapLoading(true);
     if (type === 1) {
-      if(tokenName === 'WBNB' ){
-        if(swapType === true){
-          swapExactTokensForETH()
-        }else{
-          swapExactETHForTokens()
+      if (tokenName === "WBNB") {
+        if (swapType === true) {
+          swapExactTokensForETH();
+        } else {
+          swapExactETHForTokens();
         }
-      }else{
+      } else {
         swapExactTokensForTokens();
       }
     } else {
-      if(tokenName === 'WBNB' ){
-        if(swapType === true){
-          swapExactTokensForETH()
-        } else{
-          swapExactETHForTokens()
+      if (tokenName === "WBNB") {
+        if (swapType === true) {
+          swapExactTokensForETH();
+        } else {
+          swapExactETHForTokens();
         }
-      }else{
+      } else {
         swapTokensForExactTokens();
       }
     }
@@ -307,29 +347,31 @@ const Swap = (props: Props) => {
 
   /** Check Allowences for both the tokens */
   const getAllowances = async (rest: any = "", bust: any = "") => {
-    try {
-      const allowanceA = await REST.methods
-        .allowance(address, BustRouterAddress)
-        .call();
-      const allowanceB = await BUST.methods
-        .allowance(address, BustRouterAddress)
-        .call();
-      if (rest !== "") {
-        if (parseFloat(weiToEth(allowanceA, 18)) > parseFloat(rest)) {
-          setIsApprovedRest(true);
-        } else {
-          setIsApprovedRest(false);
+    if (address) {
+      try {
+        const allowanceA = await REST.methods
+          .allowance(address, BustRouterAddress)
+          .call();
+        const allowanceB = await BUST.methods
+          .allowance(address, BustRouterAddress)
+          .call();
+        if (rest !== "") {
+          if (parseFloat(weiToEth(allowanceA, 18)) > parseFloat(rest)) {
+            setIsApprovedRest(true);
+          } else {
+            setIsApprovedRest(false);
+          }
         }
-      }
-      if (bust !== "") {
-        if (parseFloat(weiToEth(allowanceB, 18)) > parseFloat(bust)) {
-          setIsApprovedBust(true);
-        } else {
-          setIsApprovedBust(false);
+        if (bust !== "") {
+          if (parseFloat(weiToEth(allowanceB, 18)) > parseFloat(bust)) {
+            setIsApprovedBust(true);
+          } else {
+            setIsApprovedBust(false);
+          }
         }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
     }
   };
 
@@ -342,32 +384,40 @@ const Swap = (props: Props) => {
   }, [amountA, amountB]);
 
   const handleDropdownChange = (value: any) => {
-    setTokenName(value)
+    setTokenName(value);
     setAmountA("");
-    setAmountB("")
-  }
+    setAmountB("");
+    setIsApprovedRest(false);
+  };
 
   return (
     <>
       <FormContainerMain>
         <FormInputOne>
           <FormInputOneHeading>
-          {swapType && <HeadingOne>REST</HeadingOne>}
+            {swapType && <HeadingOne>REST</HeadingOne>}
             {/* <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne> */}
-            {!swapType === true &&
-            <select onChange={(e) => handleDropdownChange(e.target.value)} value={tokenName}>
-            <option value="BUST">
-              BUST
-            </option>
-            <option value="WBNB">
-              WBNB
-            </option>
-            </select>
-          }
+            {!swapType === true && (
+              <select
+                style={{
+                  padding: "4px",
+                  fontSize: "12px",
+                  height: "28px",
+                  borderRadius: "6px",
+                }}
+                onChange={(e) => handleDropdownChange(e.target.value)}
+                value={tokenName}
+              >
+                <option value="BUST">BUST</option>
+                <option value="WBNB">WBNB</option>
+              </select>
+            )}
             <HeadingOne>
               Balance:
               {swapType === true
                 ? parseFloat(rustBalance).toFixed(2)
+                : tokenName === "WBNB"
+                ? parseFloat(balance.data?.formatted).toFixed(4)
                 : parseFloat(bustBalance).toFixed(2)}
             </HeadingOne>
           </FormInputOneHeading>
@@ -383,20 +433,27 @@ const Swap = (props: Props) => {
         <FormInputOne>
           <FormInputOneHeading>
             {!swapType && <HeadingOne>REST</HeadingOne>}
-            {swapType === true &&
-            <select onChange={(e) => handleDropdownChange(e.target.value)} value={tokenName}> 
-            <option value="BUST">
-              BUST
-            </option>
-            <option value="WBNB">
-              WBNB
-            </option>
-            </select>
-          }
+            {swapType === true && (
+              <select
+                style={{
+                  padding: "4px",
+                  fontSize: "12px",
+                  height: "28px",
+                  borderRadius: "6px",
+                }}
+                onChange={(e) => handleDropdownChange(e.target.value)}
+                value={tokenName}
+              >
+                <option value="BUST">BUST</option>
+                <option value="WBNB">WBNB</option>
+              </select>
+            )}
             <HeadingOne>
               Balance:
               {swapType === true
-                ? parseFloat(bustBalance).toFixed(2)
+                ? tokenName === "WBNB"
+                  ? parseFloat(balance.data?.formatted).toFixed(4)
+                  : parseFloat(bustBalance).toFixed(2)
                 : parseFloat(rustBalance).toFixed(2)}
             </HeadingOne>
           </FormInputOneHeading>

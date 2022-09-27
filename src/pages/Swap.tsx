@@ -9,6 +9,7 @@ import {
 } from "../logic/Conversions";
 import {
   ArrowSignDiv,
+  Dropdown,
   FormContainerMain,
   FormInputOne,
   FormInputOneHeading,
@@ -398,19 +399,13 @@ const Swap = () => {
             {swapType && <HeadingOne>REST</HeadingOne>}
             {/* <HeadingOne>{swapType === true ? "REST" : "BUST"}</HeadingOne> */}
             {!swapType === true && (
-              <select
-                style={{
-                  padding: "4px",
-                  fontSize: "12px",
-                  height: "28px",
-                  borderRadius: "6px",
-                }}
+              <Dropdown
                 onChange={(e) => handleDropdownChange(e.target.value)}
                 value={tokenName}
               >
                 <option value="BUST">BUST</option>
                 <option value="WBNB">WBNB</option>
-              </select>
+              </Dropdown>
             )}
             <HeadingOne>
               Balance:
@@ -434,19 +429,13 @@ const Swap = () => {
           <FormInputOneHeading>
             {!swapType && <HeadingOne>REST</HeadingOne>}
             {swapType === true && (
-              <select
-                style={{
-                  padding: "4px",
-                  fontSize: "12px",
-                  height: "28px",
-                  borderRadius: "6px",
-                }}
+              <Dropdown
                 onChange={(e) => handleDropdownChange(e.target.value)}
                 value={tokenName}
               >
                 <option value="BUST">BUST</option>
                 <option value="WBNB">WBNB</option>
-              </select>
+              </Dropdown>
             )}
             <HeadingOne>
               Balance:
@@ -463,12 +452,6 @@ const Swap = () => {
             onChange={(e) => handleInputTwo(e.target.value)}
           ></InputField>
         </FormInputOne>
-        {/* <DetailsBlock
-          bust={initialBUST}
-          rest={initialRUST}
-          slippage={0.5}
-          deadline={15}
-        /> */}
         <SwapButtonDiv>
           {(!isApprovedRest || !isApprovedBust) && (
             <SwapButton
@@ -482,7 +465,7 @@ const Swap = () => {
             </SwapButton>
           )}
           <SwapButton
-            disabled={!isApprovedBust && !isApprovedRest}
+            disabled={amountB === '' && amountA === ''}
             onClick={() => handleSwap()}
           >
             {swapLoading ? <Spinner fontSize="14px" /> : "Swap Tokens"}

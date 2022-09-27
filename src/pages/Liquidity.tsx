@@ -82,15 +82,12 @@ const Liquidity = () => {
   const removeFailure = () => toast.error("Error removing Liquidity!");
   /** useEffect to get Reserves */
   const getReserve = async () => {
-    if(BustPair){
-
       try {
         const res = await BustPair.methods.getReserves().call();
         setReserve0(res._reserve0);
         setReserve1(res._reserve1);
       } catch (err) {
         console.log(err);
-      }
     }
   };
 
@@ -337,7 +334,6 @@ const Liquidity = () => {
       const total = await BustPair.methods.totalSupply().call();
       const totalFloat = parseFloat(weiToEth(total));
       setTotalSupply(totalFloat);
-      // const liquidity = ethToWei(bustlp)
       const BUST =
         (parseFloat(weiToEth(reserve0)) * parseFloat(bustlp)) / totalSupply;
       const REST =
@@ -351,7 +347,7 @@ const Liquidity = () => {
 
   useEffect(() => {
     getTotalSupply();
-  }, [tokenB, tokenA, isRemoveLiquidityLoading]);
+  }, [tokenB, tokenA, isRemoveLiquidityLoading, reserve0, reserve1]);
 
   const approvePair = async () => {
     try {

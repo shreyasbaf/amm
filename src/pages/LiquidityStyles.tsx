@@ -320,3 +320,11 @@ export const RangeSlider = styled.div`
   background-color: red;
 }
 `;
+
+export const Dropdown = styled.select`
+  padding: 4px;
+  font-size: 12px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+`;

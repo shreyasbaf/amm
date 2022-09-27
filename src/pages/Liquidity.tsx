@@ -46,7 +46,7 @@ const Liquidity = () => {
   const addRecentTransaction = useAddRecentTransaction();
   const BUSTAddress = bustFactoryAddress;
   const RESTAddress = wbnbAddress;
-  const [active, setActive] = useState("Add");
+  const [active, setActive] = useState(localStorage.getItem('active') || 'Add');
   const [percentage, setPercentage] = useState<any>(50);
   const [rest, setRest] = useState("");
   const [bust, setBust] = useState("");
@@ -428,7 +428,7 @@ const Liquidity = () => {
         <>
             <HeadingButtonDiv>
               <AddHeading
-                onClick={() => setActive("Add")}
+                onClick={() => {setActive("Add"); localStorage.setItem('active', 'Add')}}
                 active={active === "Add"}
               >
                 Add Liquidity
@@ -439,6 +439,7 @@ const Liquidity = () => {
                     setActive("remove");
                     getTotalSupply();
                     getInitials();
+                    localStorage.setItem('active', 'remove')
                   }}
                   active={active === "remove"}
                 >
@@ -450,6 +451,7 @@ const Liquidity = () => {
                     setActive("Swap");
                     getTotalSupply();
                     getInitials();
+                    localStorage.setItem('active', 'Swap')
                   }}
                   active={active === "Swap"}
                 >

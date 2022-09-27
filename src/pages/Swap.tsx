@@ -34,8 +34,8 @@ const Swap = () => {
   const [rustBalance, setRustBalance] = useState("0.00");
   const [bustBalance, setBustBalance] = useState("0.00");
   const [swapLoading, setSwapLoading] = useState(false);
-  const [amountA, setAmountA] = useState<any>();
-  const [amountB, setAmountB] = useState<any>();
+  const [amountA, setAmountA] = useState<any>('');
+  const [amountB, setAmountB] = useState<any>('');
   const [type, setType] = useState(0);
   const [swapType, setSwapType] = useState(true);
   const RESTAddress = wbnbAddress;

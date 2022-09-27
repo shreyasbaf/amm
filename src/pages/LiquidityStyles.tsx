@@ -15,7 +15,7 @@ background: rgb(255, 253, 250);
 box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px,
   rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px 32px;
 border-radius: 20px;
-padding: 1rem;
+padding: 1rem;  
 /* margin: 40px 0px; */
 `;
 
@@ -41,7 +41,7 @@ border-radius: 10px;
 padding: 1rem;
 margin: 0px 10px;
 cursor: pointer;
-border: 1px solid ${theme.primaryColor};
+border: 1px solid ${(props) => (props.active ? 'white' : `${theme.primaryColor}`)};
 align-items: center;
 text-align: center;
 min-width: 80px;
@@ -49,6 +49,7 @@ justify-content: center;
 transition: all 0.5s linear 0s;
 :hover{
   box-shadow: white 2px 2px;
+  scale: 1.07;
 }
 `;
 
@@ -73,11 +74,10 @@ justify-content: space-between;
 `;
 
 export const HeadingOne = styled.p`
-font-size: 16px;
+font-size: 14px;
 color: black;
 margin: 0 0 12px 0;
 font-family: 'Inter', sans-serif;
-
 `;
 
 export const InputField = styled.input`
@@ -149,8 +149,11 @@ background-color:${theme.primaryColor};
 border: none;
 margin: 10px;
 color: white;
+transition: all 0.5s linear 0s;
 :hover{
   opacity: 0.9;
+  scale: 1.05;
+  background-color: ${(props) => (props.disabled ? `${theme.red}` : `${theme.primaryColor}`)};
 }
 `;
 
@@ -327,4 +330,5 @@ export const Dropdown = styled.select`
   height: 26px;
   border-radius: 6px;
   cursor: pointer;
+  /* margin-bottom: 6px; */
 `;

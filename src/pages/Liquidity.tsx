@@ -69,7 +69,6 @@ const Liquidity = () => {
   const [selectedtokenB, setSelectedTokenB] = useState<any>();
   const [initlalREST, setInitlalREST] = useState("");
   const [initialBust, setInitialBust] = useState("");
-
   const [isRemoveAllowed, setIsRemoveAllowed] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [isRemoveLiquidityLoading, setIsRemoveLiquidityLoading] = useState(false);
@@ -80,6 +79,7 @@ const Liquidity = () => {
   const approveFailure = () => toast.error("Error approving token!");
   const removeSuccess = () => toast.success("Liquidity removed Successfully!!");
   const removeFailure = () => toast.error("Error removing Liquidity!");
+
   /** useEffect to get Reserves */
   const getReserve = async () => {
       try {

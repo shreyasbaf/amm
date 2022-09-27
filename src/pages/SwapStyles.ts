@@ -60,4 +60,10 @@ export const SwapButton = styled.button`
   margin: 10px;
   color: white;
   border: 1px solid ${theme.primaryColor};
+  transition: all 0.5s linear 0s;
+  :hover{
+    opacity: 0.9;
+    scale: 1.05;
+    background-color: ${(props) => (props.disabled ? `${theme.red}` : `${theme.primaryColor}`)};
+  }
 `;
